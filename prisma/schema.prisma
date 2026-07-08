@@ -60,6 +60,8 @@ model User {
   currentClass   Class?  @relation(fields: [currentClassId], references: [id], map: "user_current_class_id_foreign", onDelete: NoAction, onUpdate: NoAction)
   currentClassId BigInt? @map("current_class_id")
 
+  credits Int @default(0)
+
   posts              Post[]
   comments           Comment[]
   sentMessages       Message[]          @relation("MessageSender")
@@ -71,6 +73,9 @@ model User {
   bookmarks          Bookmark[]
   votes              Vote[]
   experiences        Experience[]
+  subscriptions      Subscription[]
+  registrations      FormationRegistration[]
+  reviews            Review[]
 
   @@map("user")
 }
@@ -280,6 +285,81 @@ model Vote {
   @@id([userId, pollId])
   @@map("vote")
 }
+
+// ─── Espace Formations ────────────────────────────────────────────────────────
+
+model FormationVideo {
+  id          BigInt @id @default(autoincrement())
+  title       String @db.VarChar(255)
+  description String
+  videoUrl    String @map("video_url") @db.VarChar(500)
+
+  @@map("formation_video")
+}
+
+model FormationSession {
+  id          BigInt   @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  description String
+  date        DateTime @db.Timestamptz
+  location    String   @db.VarChar(255)
+  capacity    Int
+  // OPEN : inscriptions ouvertes ; DONE : session passée ; CANCELLED : annulée
+  status      String   @default("OPEN") @db.VarChar(20)
+
+  registrations FormationRegistration[]
+  reviews       Review[]
+
+  @@map("formation_session")
+}
+
+// role : PARTICIPANT | ANIMATEUR | JURY
+// paymentMethod : CB | CREDIT (null si pas encore payé / gratuit jury)
+model FormationRegistration {
+  id            BigInt    @id @default(autoincrement())
+  role          String    @db.VarChar(20)
+  status        String    @default("PENDING") @db.VarChar(20)
+  paymentMethod String?   @map("payment_method") @db.VarChar(20)
+  creditedAt    DateTime? @map("credited_at") @db.Timestamptz
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  user      User             @relation(fields: [userId], references: [id], map: "formation_registration_user_id_foreign", onDelete: NoAction, onUpdate: NoAction)
+  userId    BigInt           @map("user_id")
+  session   FormationSession @relation(fields: [sessionId], references: [id], map: "formation_registration_session_id_foreign", onDelete: NoAction, onUpdate: NoAction)
+  sessionId BigInt           @map("session_id")
+
+  @@unique([userId, sessionId], map: "formation_registration_user_session_unique")
+  @@map("formation_registration")
+}
+
+model Subscription {
+  id        BigInt    @id @default(autoincrement())
+  status    String    @default("ACTIVE") @db.VarChar(20)
+  startDate DateTime  @default(now()) @map("start_date") @db.Timestamptz
+  endDate   DateTime? @map("end_date") @db.Timestamptz
+
+  user   User   @relation(fields: [userId], references: [id], map: "subscription_user_id_foreign", onDelete: NoAction, onUpdate: NoAction)
+  userId BigInt @map("user_id")
+
+  @@map("subscription")
+}
+
+model Review {
+  id        BigInt   @id @default(autoincrement())
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user      User             @relation(fields: [userId], references: [id], map: "review_user_id_foreign", onDelete: NoAction, onUpdate: NoAction)
+  userId    BigInt           @map("user_id")
+  session   FormationSession @relation(fields: [sessionId], references: [id], map: "review_session_id_foreign", onDelete: NoAction, onUpdate: NoAction)
+  sessionId BigInt           @map("session_id")
+
+  @@unique([userId, sessionId], map: "review_user_session_unique")
+  @@map("review")
+}
+
+// ─── Fin Espace Formations ────────────────────────────────────────────────────
 
 model Experience {
   id        BigInt    @id @default(autoincrement())

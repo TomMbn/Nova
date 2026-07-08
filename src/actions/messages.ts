@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
+import { toBigInt } from "@/lib/bigint";
 import { ok, fail, type ActionResult } from "@/lib/action";
 
 /**
@@ -16,12 +17,8 @@ export async function sendMessage(
 ): Promise<ActionResult<{ id: string }>> {
   const user = await requireUser();
 
-  let receiverBigInt: bigint;
-  try {
-    receiverBigInt = BigInt(receiverId);
-  } catch {
-    return fail("Destinataire invalide.");
-  }
+  const receiverBigInt = toBigInt(receiverId);
+  if (receiverBigInt === null) return fail("Destinataire invalide.");
 
   if (receiverBigInt === user.id) {
     return fail("Impossible de s'envoyer un message à soi-même.");
@@ -54,12 +51,8 @@ export async function markAsRead(
 ): Promise<ActionResult<{ count: number }>> {
   const user = await requireUser();
 
-  let senderBigInt: bigint;
-  try {
-    senderBigInt = BigInt(senderId);
-  } catch {
-    return fail("Expéditeur invalide.");
-  }
+  const senderBigInt = toBigInt(senderId);
+  if (senderBigInt === null) return fail("Expéditeur invalide.");
 
   const { count } = await prisma.message.updateMany({
     where: {
