@@ -3,36 +3,46 @@ import { PrismaClient } from "../src/generated/prisma/client";
 
 const prisma = new PrismaClient();
 
-const PROFILE_TYPES = [
-  { slug: "futur-eleve", label: "Futur élève" },
-  { slug: "eleve-actuel", label: "Élève actuel" },
-  { slug: "alumni", label: "Ancien élève (alumni)" },
-  { slug: "intervenant", label: "Intervenant" },
-  { slug: "equipe-pedagogique", label: "Membre de l'équipe pédagogique" },
+const ROLES = [
+  "Futur élève",
+  "Élève actuel",
+  "Alumni",
+  "Intervenant",
+  "Équipe pédagogique",
 ];
 
-const THEMES = [
-  { slug: "dev", label: "Dev" },
-  { slug: "ux-ui", label: "UX/UI" },
-  { slug: "data", label: "Data" },
-  { slug: "marketing", label: "Marketing" },
-  { slug: "design", label: "Design" },
+const CATEGORIES = ["Entraide", "Événement", "Annonce", "Projet"];
+
+const TOPICS = [
+  { slug: "dev", name: "Dev" },
+  { slug: "ux-ui", name: "UX/UI" },
+  { slug: "data", name: "Data" },
+  { slug: "marketing", name: "Marketing" },
+  { slug: "design", name: "Design" },
 ];
 
 async function main() {
-  for (const profileType of PROFILE_TYPES) {
-    await prisma.profileType.upsert({
-      where: { slug: profileType.slug },
-      update: { label: profileType.label },
-      create: profileType,
+  for (const name of ROLES) {
+    await prisma.role.upsert({
+      where: { name },
+      update: {},
+      create: { name },
     });
   }
 
-  for (const theme of THEMES) {
-    await prisma.theme.upsert({
-      where: { slug: theme.slug },
-      update: { label: theme.label },
-      create: theme,
+  for (const name of CATEGORIES) {
+    await prisma.category.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+  }
+
+  for (const topic of TOPICS) {
+    await prisma.topic.upsert({
+      where: { slug: topic.slug },
+      update: { name: topic.name },
+      create: topic,
     });
   }
 }

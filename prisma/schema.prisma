@@ -1,5 +1,13 @@
 // Schéma de données — Réseau social communautaire de l'école
-// Voir fiche de cadrage pour le contexte fonctionnel (MVP vs V2)
+// Basé sur le MCD final (voir doc de conception).
+// Écarts assumés par rapport au MCD :
+//  - ids en BigInt autoincrement (le MCD spécifie du BIGINT IDENTITY, Prisma
+//    modélise ça avec @default(autoincrement()))
+//  - `User.passwordHash` ajouté (hors MCD) pour l'auth Credentials existante
+//  - `Media.type` modélisé en enum natif Postgres plutôt qu'en VARCHAR + CHECK
+//  - les CHECK constraints du MCD (ex: message.sender_id <> receiver_id) ne
+//    sont pas exprimables dans le schema Prisma : à ajouter à la main dans la
+//    migration SQL générée si on veut les faire porter par la DB
 
 generator client {
   provider = "prisma-client"
@@ -11,153 +19,275 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Nature du post — liste fermée (non extensible dans la fiche)
-enum PostCategory {
-  ENTRAIDE
-  EVENEMENT
-  ANNONCE
-  PROJET
+enum MediaType {
+  IMAGE
+  VIDEO
 }
 
-// Type de profil à l'onboarding — liste extensible, donc en table plutôt qu'en enum
-model ProfileType {
-  id    String @id @default(cuid())
-  slug  String @unique
-  label String
+model Role {
+  id   BigInt @id @default(autoincrement())
+  name String @unique @db.VarChar(50)
 
   users User[]
+
+  @@map("role")
 }
 
-// Domaine — sert à la fois de "spécialité" (côté User) et de "thématique" (côté Post)
-model Theme {
-  id    String @id @default(cuid())
-  slug  String @unique
-  label String
+model Class {
+  id   BigInt @id @default(autoincrement())
+  name String @unique @db.VarChar(100)
 
-  users UserTheme[]
-  posts PostTheme[]
+  users User[]
+
+  @@map("class")
 }
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  passwordHash  String
-  name          String
-  bio           String?
-  skills        String[] @default([])
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           BigInt   @id @default(autoincrement())
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash")
+  name         String   @db.VarChar(255)
+  bio          String?
+  avatarUrl    String?  @map("avatar_url") @db.VarChar(500)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
 
-  profileType   ProfileType @relation(fields: [profileTypeId], references: [id])
-  profileTypeId String
+  role   Role   @relation(fields: [roleId], references: [id])
+  roleId BigInt @map("role_id")
 
-  themes      UserTheme[]
+  currentClass   Class?  @relation(fields: [currentClassId], references: [id])
+  currentClassId BigInt? @map("current_class_id")
+
+  posts              Post[]
+  comments           Comment[]
+  sentMessages       Message[]          @relation("MessageSender")
+  receivedMessages   Message[]          @relation("MessageReceiver")
+  followedTopics     FollowedTopic[]
+  followedCategories FollowedCategory[]
+  skills             UserSkill[]
+  postLikes          PostLike[]
+  bookmarks          Bookmark[]
+  votes              Vote[]
+  experiences        Experience[]
+
+  @@map("user")
+}
+
+model Topic {
+  id   BigInt @id @default(autoincrement())
+  name String @unique @db.VarChar(100)
+  slug String @unique @db.VarChar(100)
+
+  posts      PostTopic[]
+  followedBy FollowedTopic[]
+
+  @@map("topic")
+}
+
+model Category {
+  id   BigInt @id @default(autoincrement())
+  name String @unique @db.VarChar(100)
+
+  posts      Post[]
+  followedBy FollowedCategory[]
+
+  @@map("category")
+}
+
+model Skill {
+  id   BigInt @id @default(autoincrement())
+  name String @unique @db.VarChar(100)
+
+  users UserSkill[]
+
+  @@map("skill")
+}
+
+model Company {
+  id   BigInt @id @default(autoincrement())
+  name String @unique @db.VarChar(255)
+
   experiences Experience[]
-  posts       Post[]
-  likes       Like[]
-  saves       Save[]
-  pollVotes   PollVote[]
-}
 
-model UserTheme {
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId  String
-  theme   Theme  @relation(fields: [themeId], references: [id], onDelete: Cascade)
-  themeId String
-
-  @@id([userId, themeId])
-}
-
-// Historique pro — utilisé par la recherche de membres (V2)
-model Experience {
-  id        String    @id @default(cuid())
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  company   String
-  title     String
-  startDate DateTime?
-  endDate   DateTime?
+  @@map("company")
 }
 
 model Post {
-  id        String       @id @default(cuid())
-  author    User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId  String
-  category  PostCategory
-  text      String?
-  videoUrl  String?
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  id        BigInt    @id @default(autoincrement())
+  content   String?
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  eventDate DateTime? @map("event_date") @db.Timestamptz
+  location  String?   @db.VarChar(255)
 
-  themes PostTheme[]
-  images PostImage[]
-  poll   Poll?
-  likes  Like[]
-  saves  Save[]
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId BigInt @map("author_id")
+
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId BigInt   @map("category_id")
+
+  media     Media[]
+  poll      Poll?
+  comments  Comment[]
+  topics    PostTopic[]
+  likes     PostLike[]
+  bookmarks Bookmark[]
+
+  @@map("post")
 }
 
-model PostTheme {
-  post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId  String
-  theme   Theme  @relation(fields: [themeId], references: [id], onDelete: Cascade)
-  themeId String
+model Media {
+  id       BigInt    @id @default(autoincrement())
+  type     MediaType
+  url      String    @db.VarChar(500)
+  position Int
 
-  @@id([postId, themeId])
-}
+  post   Post   @relation(fields: [postId], references: [id])
+  postId BigInt @map("post_id")
 
-model PostImage {
-  id     String @id @default(cuid())
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId String
-  url    String
-  order  Int    @default(0)
+  @@map("media")
 }
 
 model Poll {
-  id     String @id @default(cuid())
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId String @unique
+  id       BigInt @id @default(autoincrement())
+  question String @db.VarChar(255)
+
+  post   Post   @relation(fields: [postId], references: [id])
+  postId BigInt @unique @map("post_id")
 
   options PollOption[]
+  votes   Vote[]
+
+  @@map("poll")
 }
 
 model PollOption {
-  id     String @id @default(cuid())
-  poll   Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  pollId String
-  label  String
+  id    BigInt @id @default(autoincrement())
+  label String @db.VarChar(255)
 
-  votes PollVote[]
+  poll   Poll   @relation(fields: [pollId], references: [id])
+  pollId BigInt @map("poll_id")
+
+  votes Vote[]
+
+  @@map("poll_option")
 }
 
-model PollVote {
-  id       String     @id @default(cuid())
-  option   PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
-  optionId String
-  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId   String
+model Comment {
+  id        BigInt   @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
 
-  @@unique([optionId, userId])
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId BigInt @map("author_id")
+
+  post   Post   @relation(fields: [postId], references: [id])
+  postId BigInt @map("post_id")
+
+  @@map("comment")
 }
 
-model Like {
-  id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId    String
-  createdAt DateTime @default(now())
+// CHECK ("sender_id" <> "receiver_id") côté MCD : à ajouter à la main dans la
+// migration SQL, non représentable dans le schema Prisma.
+model Message {
+  id        BigInt    @id @default(autoincrement())
+  content   String
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  readAt    DateTime? @map("read_at") @db.Timestamptz
 
-  @@unique([userId, postId])
+  sender   User   @relation("MessageSender", fields: [senderId], references: [id])
+  senderId BigInt @map("sender_id")
+
+  receiver   User   @relation("MessageReceiver", fields: [receiverId], references: [id])
+  receiverId BigInt @map("receiver_id")
+
+  @@map("message")
 }
 
-model Save {
-  id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId    String
-  createdAt DateTime @default(now())
+model PostTopic {
+  post    Post   @relation(fields: [postId], references: [id])
+  postId  BigInt @map("post_id")
+  topic   Topic  @relation(fields: [topicId], references: [id])
+  topicId BigInt @map("topic_id")
 
-  @@unique([userId, postId])
+  @@id([postId, topicId])
+  @@map("post_topic")
+}
+
+model FollowedTopic {
+  user    User   @relation(fields: [userId], references: [id])
+  userId  BigInt @map("user_id")
+  topic   Topic  @relation(fields: [topicId], references: [id])
+  topicId BigInt @map("topic_id")
+
+  @@id([userId, topicId])
+  @@map("followed_topic")
+}
+
+model FollowedCategory {
+  user       User     @relation(fields: [userId], references: [id])
+  userId     BigInt   @map("user_id")
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId BigInt   @map("category_id")
+
+  @@id([userId, categoryId])
+  @@map("followed_category")
+}
+
+model UserSkill {
+  user    User   @relation(fields: [userId], references: [id])
+  userId  BigInt @map("user_id")
+  skill   Skill  @relation(fields: [skillId], references: [id])
+  skillId BigInt @map("skill_id")
+
+  @@id([userId, skillId])
+  @@map("user_skill")
+}
+
+model PostLike {
+  user      User     @relation(fields: [userId], references: [id])
+  userId    BigInt   @map("user_id")
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    BigInt   @map("post_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@id([userId, postId])
+  @@map("post_like")
+}
+
+model Bookmark {
+  user      User     @relation(fields: [userId], references: [id])
+  userId    BigInt   @map("user_id")
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    BigInt   @map("post_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@id([userId, postId])
+  @@map("bookmark")
+}
+
+model Vote {
+  user     User       @relation(fields: [userId], references: [id])
+  userId   BigInt     @map("user_id")
+  option   PollOption @relation(fields: [optionId], references: [id])
+  optionId BigInt     @map("option_id")
+  poll     Poll       @relation(fields: [pollId], references: [id])
+  pollId   BigInt     @map("poll_id")
+
+  @@id([userId, pollId])
+  @@map("vote")
+}
+
+model Experience {
+  id        BigInt    @id @default(autoincrement())
+  title     String?   @db.VarChar(255)
+  startDate DateTime? @map("start_date") @db.Date
+  endDate   DateTime? @map("end_date") @db.Date
+  isCurrent Boolean   @default(false) @map("is_current")
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId BigInt @map("user_id")
+
+  company   Company @relation(fields: [companyId], references: [id])
+  companyId BigInt  @map("company_id")
+
+  @@map("experience")
 }
