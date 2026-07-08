@@ -9,9 +9,9 @@ UX/UI). Voir la fiche de cadrage produit pour le détail fonctionnel complet
 (profils, catégories/thématiques de post, MVP vs V2). Points structurants à
 connaître avant de toucher au domaine :
 
-### Espace Formations (alumni uniquement)
+### Espace Formations
 
-Fonctionnalité réservée aux alumni, accessible depuis un espace dédié.
+Fonctionnalité accessible à tous les utilisateurs authentifiés, depuis un espace dédié.
 Deux types de formations totalement distincts (pas de table parente commune) :
 
 - **FormationVideo** — catalogue de vidéos accessibles via abonnement mensuel
