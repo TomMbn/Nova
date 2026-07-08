@@ -1,5 +1,9 @@
 import { prisma } from "@/lib/prisma";
 
+// Les fonctions ci-dessous retournent des objets Prisma bruts avec des ids
+// BigInt. Utiliser serializeBigInt() avant de passer le résultat à un Client
+// Component.
+
 export function getSkills(search?: string) {
   return prisma.skill.findMany({
     where: search ? { name: { contains: search, mode: "insensitive" } } : undefined,

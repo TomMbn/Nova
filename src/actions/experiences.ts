@@ -2,16 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
+import { toBigInt } from "@/lib/bigint";
 import { ok, fail, type ActionResult } from "@/lib/action";
-
-function toBigInt(value: unknown): bigint | null {
-  if (value === null || value === undefined || value === "") return null;
-  try {
-    return BigInt(value as string | number | bigint);
-  } catch {
-    return null;
-  }
-}
 
 function toDate(value: unknown): Date | null {
   if (value === null || value === undefined || value === "") return null;
@@ -121,6 +113,10 @@ export async function deleteExperience(
   if (!experience) return fail("Expérience introuvable.");
   if (experience.userId !== user.id) return fail("Non autorisé.");
 
-  await prisma.experience.delete({ where: { id: experienceId } });
-  return ok({ id: String(experienceId) });
+  try {
+    await prisma.experience.delete({ where: { id: experienceId } });
+    return ok({ id: String(experienceId) });
+  } catch {
+    return fail("Impossible de supprimer l'expérience.");
+  }
 }
