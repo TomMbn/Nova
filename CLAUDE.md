@@ -9,6 +9,43 @@ UX/UI). Voir la fiche de cadrage produit pour le détail fonctionnel complet
 (profils, catégories/thématiques de post, MVP vs V2). Points structurants à
 connaître avant de toucher au domaine :
 
+### Espace Formations (alumni uniquement)
+
+Fonctionnalité réservée aux alumni, accessible depuis un espace dédié.
+Deux types de formations totalement distincts (pas de table parente commune) :
+
+- **FormationVideo** — catalogue de vidéos accessibles via abonnement mensuel
+  (8–12€, paiement CB mocké, durée 30 jours). Modèles : `FormationVideo`,
+  `Subscription`. Actions : `activateSubscription`, `cancelSubscription`.
+
+- **FormationSession** — sessions en présentiel. Trois rôles possibles par
+  session (`FormationRegistration.role`) :
+  - `PARTICIPANT` : réserve une place, paie 20€ CB (mocké) ou 1 crédit.
+  - `ANIMATEUR` : propose et anime une session. Reçoit automatiquement
+    1 crédit après la date de fin (attribution lazy via `claimPendingCredits`
+    au chargement de la page — champ `creditedAt` sur `FormationRegistration`
+    sert de marqueur "déjà crédité").
+  - `JURY` : s'inscrit pour évaluer des pitchs, participation gratuite.
+
+  Un utilisateur ne peut avoir qu'**un seul rôle par session**
+  (contrainte `UNIQUE(userId, sessionId)` en base).
+
+  Après participation, les crédits peuvent être utilisés pour s'inscrire
+  gratuitement à une prochaine session présentielle. Le solde est stocké
+  directement dans `User.credits` (Int). La déduction de crédit est atomique
+  dans la transaction d'inscription (`updateMany` avec `WHERE credits >= 1`
+  pour éviter le passage en négatif).
+
+  Avis possibles uniquement pour les `PARTICIPANT` avec `status = CONFIRMED`,
+  un seul avis par session (`UNIQUE(userId, sessionId)` sur `Review`).
+
+Points de vigilance :
+- `FormationRegistration.status` : `PENDING | CONFIRMED | CANCELLED`
+- `FormationSession.status` : `OPEN | DONE | CANCELLED`
+- `Subscription.status` : `ACTIVE | CANCELLED`
+- Annulation d'une inscription : remboursement crédit uniquement si
+  `paymentMethod = CREDIT` ET `session.status = OPEN`.
+
 - **Catégorie** qualifie un post, une seule par post (`post.category_id`).
 - **Thématique** (`Topic`) qualifie un post, plusieurs possibles
   (`post_topic`). Sert aussi aux préférences de notif (`followed_topic`).
