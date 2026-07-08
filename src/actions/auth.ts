@@ -5,29 +5,9 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
 import { ok, fail, type ActionResult } from "@/lib/action";
+import { toBigInt, toBigIntList } from "@/lib/bigint";
 
 const BCRYPT_ROUNDS = 10;
-
-// Convertit une valeur de formulaire (string | number | bigint) en BigInt.
-// Renvoie null si la valeur est absente/vide/invalide.
-function toBigInt(value: unknown): bigint | null {
-  if (value === null || value === undefined || value === "") return null;
-  try {
-    return BigInt(value as string | number | bigint);
-  } catch {
-    return null;
-  }
-}
-
-function toBigIntList(ids: (string | number | bigint)[]): bigint[] {
-  const out: bigint[] = [];
-  for (const id of ids) {
-    const parsed = toBigInt(id);
-    if (parsed !== null) out.push(parsed);
-  }
-  // Déduplique pour éviter les doublons de clé primaire composite.
-  return [...new Set(out)];
-}
 
 /**
  * Crée un nouvel utilisateur (mot de passe hashé bcrypt).
