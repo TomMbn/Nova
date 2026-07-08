@@ -1,0 +1,163 @@
+// Schéma de données — Réseau social communautaire de l'école
+// Voir fiche de cadrage pour le contexte fonctionnel (MVP vs V2)
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Nature du post — liste fermée (non extensible dans la fiche)
+enum PostCategory {
+  ENTRAIDE
+  EVENEMENT
+  ANNONCE
+  PROJET
+}
+
+// Type de profil à l'onboarding — liste extensible, donc en table plutôt qu'en enum
+model ProfileType {
+  id    String @id @default(cuid())
+  slug  String @unique
+  label String
+
+  users User[]
+}
+
+// Domaine — sert à la fois de "spécialité" (côté User) et de "thématique" (côté Post)
+model Theme {
+  id    String @id @default(cuid())
+  slug  String @unique
+  label String
+
+  users UserTheme[]
+  posts PostTheme[]
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  name          String
+  bio           String?
+  skills        String[] @default([])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  profileType   ProfileType @relation(fields: [profileTypeId], references: [id])
+  profileTypeId String
+
+  themes      UserTheme[]
+  experiences Experience[]
+  posts       Post[]
+  likes       Like[]
+  saves       Save[]
+  pollVotes   PollVote[]
+}
+
+model UserTheme {
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  theme   Theme  @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  themeId String
+
+  @@id([userId, themeId])
+}
+
+// Historique pro — utilisé par la recherche de membres (V2)
+model Experience {
+  id        String    @id @default(cuid())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  company   String
+  title     String
+  startDate DateTime?
+  endDate   DateTime?
+}
+
+model Post {
+  id        String       @id @default(cuid())
+  author    User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
+  category  PostCategory
+  text      String?
+  videoUrl  String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  themes PostTheme[]
+  images PostImage[]
+  poll   Poll?
+  likes  Like[]
+  saves  Save[]
+}
+
+model PostTheme {
+  post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId  String
+  theme   Theme  @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  themeId String
+
+  @@id([postId, themeId])
+}
+
+model PostImage {
+  id     String @id @default(cuid())
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+  url    String
+  order  Int    @default(0)
+}
+
+model Poll {
+  id     String @id @default(cuid())
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String @unique
+
+  options PollOption[]
+}
+
+model PollOption {
+  id     String @id @default(cuid())
+  poll   Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollId String
+  label  String
+
+  votes PollVote[]
+}
+
+model PollVote {
+  id       String     @id @default(cuid())
+  option   PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  optionId String
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+
+  @@unique([optionId, userId])
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model Save {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
