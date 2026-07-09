@@ -14,14 +14,14 @@ function MemberCard({ user }: { user: Member }) {
   return (
     <Link
       href={`/profil/${user.id}`}
-      className="flex items-center gap-3 border border-[#e8e8e8] rounded-[10px] p-[10px] transition-colors hover:bg-muted/40"
+      className="flex items-center gap-3 border border-border rounded-[10px] p-[10px] transition-colors hover:bg-muted/40"
     >
-      <div className="size-[46px] rounded-[10px] bg-[#e8e8e8] flex items-center justify-center shrink-0 overflow-hidden">
+      <div className="size-[46px] rounded-[10px] bg-muted flex items-center justify-center shrink-0 overflow-hidden">
         {user.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={user.avatarUrl} alt={user.name} className="size-full object-cover" />
         ) : (
-          <User size={22} strokeWidth={1.5} className="text-[#888]" />
+          <User size={22} strokeWidth={1.5} className="text-muted-foreground" />
         )}
       </div>
 
@@ -37,13 +37,13 @@ function MemberCard({ user }: { user: Member }) {
             {user.skills.slice(0, 3).map((skill) => (
               <span
                 key={skill}
-                className="px-[8px] py-0.5 h-5 rounded-[10px] bg-[#f7f7f7] text-[11px] font-bold leading-none flex items-center"
+                className="px-[8px] py-0.5 h-5 rounded-[10px] bg-foreground/5 text-[11px] font-bold leading-none flex items-center"
               >
                 {skill}
               </span>
             ))}
             {user.skills.length > 3 && (
-              <span className="text-[11px] text-[#888] flex items-center">
+              <span className="text-[11px] text-muted-foreground flex items-center">
                 +{user.skills.length - 3}
               </span>
             )}

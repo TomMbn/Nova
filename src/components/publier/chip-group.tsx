@@ -42,8 +42,8 @@ export function ChipGroup({
             className={cn(
               "px-[14px] h-8 rounded-[10px] text-[13px] font-bold leading-none transition-colors border",
               isSelected
-                ? "bg-[#1e1e1e] border-[#1e1e1e] text-[#e8e8e8]"
-                : "bg-background border-[#e8e8e8] text-foreground hover:bg-muted"
+                ? "bg-primary border-primary text-primary-foreground"
+                : "bg-background border-border text-foreground hover:bg-muted"
             )}
           >
             {opt.name}
@@ -55,7 +55,7 @@ export function ChipGroup({
           type="button"
           onClick={() => setExpanded(true)}
           aria-label="Afficher plus d'options"
-          className="flex items-center justify-center size-8 rounded-[10px] border border-[#e8e8e8] hover:bg-muted transition-colors shrink-0"
+          className="flex items-center justify-center size-8 rounded-[10px] border border-border hover:bg-muted transition-colors shrink-0"
         >
           <Plus size={16} strokeWidth={1.8} />
         </button>

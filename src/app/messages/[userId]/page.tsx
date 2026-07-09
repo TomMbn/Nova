@@ -36,7 +36,7 @@ export default async function ConversationPage({
   return (
     <div className="flex flex-col h-svh">
       {/* Header */}
-      <header className="flex items-center gap-3 px-[14px] py-[15px] sticky top-0 bg-background z-40 border-b border-[#e8e8e8]">
+      <header className="flex items-center gap-3 px-[14px] py-[15px] sticky top-0 bg-background z-40 border-b border-border">
         <Link
           href="/messages"
           className="flex items-center justify-center size-[38px] rounded-[10px] hover:bg-muted transition-colors shrink-0"

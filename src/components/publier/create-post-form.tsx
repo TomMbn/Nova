@@ -139,7 +139,7 @@ export function CreatePostForm({
               onChange={(e) => setContent(e.target.value.slice(0, CONTENT_MAX_LENGTH))}
               placeholder="Quoi de neuf dans la communauté ?"
               rows={4}
-              className="w-full rounded-[10px] border border-[#e8e8e8] bg-transparent p-3 pb-6 text-sm outline-none resize-none focus-visible:border-foreground"
+              className="w-full rounded-[10px] border border-border bg-transparent p-3 pb-6 text-sm outline-none resize-none focus-visible:border-foreground"
             />
             <span className="absolute bottom-2 right-3 text-[11px] text-muted-foreground">
               {content.length}/{CONTENT_MAX_LENGTH}
@@ -185,12 +185,12 @@ export function CreatePostForm({
         {error && <p className="text-sm text-destructive">{error}</p>}
       </main>
 
-      <div className="fixed bottom-0 inset-x-0 z-50 bg-background border-t border-[#e8e8e8] px-[14px] pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] flex flex-col gap-2">
+      <div className="fixed bottom-0 inset-x-0 z-50 bg-background border-t border-border px-[14px] pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] flex flex-col gap-2">
         <button
           type="button"
           onClick={handleSubmit}
           disabled={isPending}
-          className="h-11 rounded-[10px] bg-[#1e1e1e] text-[#e8e8e8] text-sm font-bold disabled:opacity-50 transition-opacity"
+          className="h-11 rounded-[10px] bg-primary text-primary-foreground text-sm font-bold disabled:opacity-50 transition-opacity"
         >
           {isPending ? "Publication..." : "Publier"}
         </button>
@@ -198,7 +198,7 @@ export function CreatePostForm({
           type="button"
           disabled
           title="Les brouillons ne sont pas encore disponibles"
-          className="h-11 rounded-[10px] border border-[#e8e8e8] text-sm font-bold text-muted-foreground opacity-50 cursor-not-allowed"
+          className="h-11 rounded-[10px] border border-border text-sm font-bold text-muted-foreground opacity-50 cursor-not-allowed"
         >
           Enregistrer en brouillon
         </button>

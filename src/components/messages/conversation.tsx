@@ -96,12 +96,12 @@ export function Conversation({ partnerId, currentUserId, initialMessages }: Prop
               <div
                 className={`max-w-[75%] px-[14px] py-[10px] rounded-[16px] ${
                   isMe
-                    ? "bg-[#1e1e1e] text-[#e8e8e8] rounded-br-[4px]"
-                    : "bg-[#f7f7f7] text-[#1e1e1e] rounded-bl-[4px]"
+                    ? "bg-primary text-primary-foreground rounded-br-[4px]"
+                    : "bg-muted text-foreground rounded-bl-[4px]"
                 }`}
               >
                 <p className="text-[14px] leading-snug whitespace-pre-wrap break-words">{msg.content}</p>
-                <p className={`text-[10px] mt-1 ${isMe ? "text-[#e8e8e8]/60" : "text-muted-foreground"}`}>
+                <p className={`text-[10px] mt-1 ${isMe ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
                   {formatTime(msg.createdAt)}
                 </p>
               </div>
@@ -112,7 +112,7 @@ export function Conversation({ partnerId, currentUserId, initialMessages }: Prop
       </div>
 
       {/* Zone de saisie */}
-      <div className="px-[14px] py-3 border-t border-[#e8e8e8] flex gap-2 items-end">
+      <div className="px-[14px] py-3 border-t border-border flex gap-2 items-end">
         <textarea
           ref={textareaRef}
           value={content}
@@ -120,13 +120,13 @@ export function Conversation({ partnerId, currentUserId, initialMessages }: Prop
           onKeyDown={handleKeyDown}
           placeholder="Écrire un message…"
           rows={1}
-          className="flex-1 resize-none rounded-[12px] border border-[#e8e8e8] bg-[#f7f7f7] px-[14px] py-[10px] text-[14px] outline-none focus:border-[#1e1e1e] placeholder:text-muted-foreground max-h-[120px] overflow-y-auto"
+          className="flex-1 resize-none rounded-[12px] border border-border bg-muted px-[14px] py-[10px] text-[14px] outline-none focus:border-foreground placeholder:text-muted-foreground max-h-[120px] overflow-y-auto"
           style={{ lineHeight: "1.4" }}
         />
         <button
           onClick={handleSend}
           disabled={!content.trim() || isSending}
-          className="flex items-center justify-center size-[42px] rounded-full bg-[#1e1e1e] text-[#e8e8e8] shrink-0 disabled:opacity-40 transition-opacity"
+          className="flex items-center justify-center size-[42px] rounded-full bg-primary text-primary-foreground shrink-0 disabled:opacity-40 transition-opacity"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="22" y1="2" x2="11" y2="13" />

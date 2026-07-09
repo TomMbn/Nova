@@ -42,7 +42,7 @@ export function SessionCTA({ sessionId, cpfUrl }: Props) {
 
   if (!checked) {
     return (
-      <div className="flex items-center justify-center w-full h-[56px] rounded-[10px] bg-[#e8e8e8]" />
+      <div className="flex items-center justify-center w-full h-[56px] rounded-[10px] bg-muted" />
     );
   }
 
@@ -51,7 +51,7 @@ export function SessionCTA({ sessionId, cpfUrl }: Props) {
       <button
         onClick={handleCancel}
         disabled={isPending}
-        className="flex items-center justify-center w-full h-[56px] rounded-[10px] bg-[#e8e8e8] text-[#1e1e1e] disabled:opacity-60"
+        className="flex items-center justify-center w-full h-[56px] rounded-[10px] bg-muted text-foreground disabled:opacity-60"
       >
         <span className="text-[14px] font-bold">
           {isPending ? "En cours…" : "Annuler mon inscription"}
@@ -64,7 +64,7 @@ export function SessionCTA({ sessionId, cpfUrl }: Props) {
     <button
       onClick={handleRegister}
       disabled={isPending}
-      className="flex items-center justify-center w-full h-[56px] rounded-[10px] bg-[#1e1e1e] text-[#e8e8e8] disabled:opacity-60"
+      className="flex items-center justify-center w-full h-[56px] rounded-[10px] bg-primary text-primary-foreground disabled:opacity-60"
     >
       <span className="text-[14px] font-bold">
         {isPending ? "En cours…" : "S'inscrire"}

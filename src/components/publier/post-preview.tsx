@@ -34,15 +34,15 @@ export function PostPreview({
   const previewPollOptions = poll ? poll.options.filter((o) => o.trim()) : [];
 
   return (
-    <article className="border border-[#e8e8e8] rounded-[10px] p-[10px] flex flex-col gap-[10px]">
+    <article className="border border-border rounded-[10px] p-[10px] flex flex-col gap-[10px]">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="size-[38px] rounded-[10px] bg-[#e8e8e8] flex items-center justify-center shrink-0 overflow-hidden">
+          <div className="size-[38px] rounded-[10px] bg-muted flex items-center justify-center shrink-0 overflow-hidden">
             {author.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={author.avatarUrl} alt={author.name} className="size-full object-cover" />
             ) : (
-              <User size={20} strokeWidth={1.5} className="text-[#888]" />
+              <User size={20} strokeWidth={1.5} className="text-muted-foreground" />
             )}
           </div>
           <div className="min-w-0">
@@ -58,14 +58,14 @@ export function PostPreview({
       {(category || topics.length > 0) && (
         <div className="flex gap-2 flex-wrap">
           {category && (
-            <span className="px-[10px] py-1 h-6 rounded-[10px] bg-[#e8e8e8] text-[12px] font-bold leading-none flex items-center">
+            <span className="px-[10px] py-1 h-6 rounded-[10px] bg-muted text-[12px] font-bold leading-none flex items-center">
               {category.name}
             </span>
           )}
           {topics.map((t) => (
             <span
               key={t.id}
-              className="px-[10px] py-1 h-6 rounded-[10px] bg-[#f7f7f7] text-[12px] font-bold leading-none flex items-center"
+              className="px-[10px] py-1 h-6 rounded-[10px] bg-foreground/5 text-[12px] font-bold leading-none flex items-center"
             >
               {t.name}
             </span>

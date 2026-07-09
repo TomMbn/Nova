@@ -18,7 +18,7 @@ export function SearchSelect({
       <select
         name={name}
         defaultValue={value ?? ""}
-        className="w-full h-[52px] appearance-none rounded-2xl border border-[#e8e8e8] bg-transparent pl-4 pr-10 text-[14px] text-foreground outline-none focus-visible:border-[#1e1e1e]"
+        className="w-full h-[52px] appearance-none rounded-2xl border border-border bg-transparent pl-4 pr-10 text-[14px] text-foreground outline-none focus-visible:border-foreground"
       >
         <option value="">{label}</option>
         {options.map((opt) => (
@@ -30,7 +30,7 @@ export function SearchSelect({
       <ChevronDown
         size={18}
         strokeWidth={1.8}
-        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#888]"
+        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
       />
     </div>
   );

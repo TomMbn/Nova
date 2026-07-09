@@ -33,7 +33,7 @@ export function FormationsWithTabs({
                   onClick={() => setTab(t)}
                   className={cn(
                     "flex-1 pb-[10px] text-[12px] font-bold text-center border-b-2 transition-colors",
-                    isActive ? "border-[#1e1e1e] text-[#1e1e1e]" : "border-[#e8e8e8] text-muted-foreground"
+                    isActive ? "border-foreground text-foreground" : "border-border text-muted-foreground"
                   )}
                 >
                   {label}

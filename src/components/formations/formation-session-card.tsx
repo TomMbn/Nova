@@ -8,7 +8,7 @@ function formatDate(date: Date): string {
 export function FormationSessionCard({ session }: { session: FormationSession }) {
   return (
     <Link href={`/formations/sessions/${session.id}`}>
-      <article className="border border-[#e8e8e8] rounded-[10px] p-[10px] flex flex-col gap-[10px]">
+      <article className="border border-border rounded-[10px] p-[10px] flex flex-col gap-[10px]">
 
         {/* Header : titre + date */}
         <div className="flex items-start justify-between gap-2">
@@ -25,7 +25,7 @@ export function FormationSessionCard({ session }: { session: FormationSession })
             {session.topics.map((t) => (
               <span
                 key={t.id}
-                className="px-[10px] py-1 h-6 rounded-[10px] bg-[#f7f7f7] text-[12px] font-bold leading-none flex items-center"
+                className="px-[10px] py-1 h-6 rounded-[10px] bg-muted text-[12px] font-bold leading-none flex items-center"
               >
                 {t.name}
               </span>
@@ -37,7 +37,7 @@ export function FormationSessionCard({ session }: { session: FormationSession })
         <p className="text-[12px] font-normal leading-snug line-clamp-2">{session.description}</p>
 
         {/* Image */}
-        <div className="relative w-full h-[185px] rounded-[10px] overflow-hidden border border-[#e8e8e8] bg-[#f7f7f7]">
+        <div className="relative w-full h-[185px] rounded-[10px] overflow-hidden border border-border bg-muted">
           {session.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={session.imageUrl} alt={session.title} className="w-full h-full object-cover" />

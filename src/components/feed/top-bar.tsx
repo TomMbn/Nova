@@ -14,7 +14,22 @@ export function TopBar() {
       </Link>
 
       <div className="flex items-center justify-center h-[46px] rounded-[10px] flex-1">
-        <Image src="/logo-nova/nova-logo.png" alt="Nova" width={116} height={28} priority />
+        <Image
+          src="/logo-nova/nova-logo.png"
+          alt="Nova"
+          width={116}
+          height={28}
+          priority
+          className="block dark:hidden"
+        />
+        <Image
+          src="/logo-nova/nova-logo-blanc.png"
+          alt="Nova"
+          width={116}
+          height={28}
+          priority
+          className="hidden dark:block"
+        />
       </div>
 
       <div className="flex items-center gap-1">

@@ -101,11 +101,11 @@ export function ContentPicker({
               className={cn(
                 "flex flex-col items-center gap-1.5 rounded-[10px] border p-3 transition-colors",
                 active
-                  ? "border-[#1e1e1e] bg-muted"
-                  : "border-[#e8e8e8] hover:bg-muted"
+                  ? "border-foreground bg-muted"
+                  : "border-border hover:bg-muted"
               )}
             >
-              <span className="flex items-center justify-center size-9 rounded-full border border-[#e8e8e8]">
+              <span className="flex items-center justify-center size-9 rounded-full border border-border">
                 <Icon size={18} strokeWidth={1.6} />
               </span>
               <span className="text-xs font-bold">{tile.label}</span>
@@ -116,12 +116,12 @@ export function ContentPicker({
       </div>
 
       {openPanel === "POLL" && poll && (
-        <div className="flex flex-col gap-2 rounded-[10px] border border-[#e8e8e8] p-3">
+        <div className="flex flex-col gap-2 rounded-[10px] border border-border p-3">
           <input
             value={poll.question}
             onChange={(e) => onChangePoll({ ...poll, question: e.target.value })}
             placeholder="Votre question"
-            className="h-9 rounded-[10px] border border-[#e8e8e8] bg-transparent px-3 text-sm outline-none focus-visible:border-foreground"
+            className="h-9 rounded-[10px] border border-border bg-transparent px-3 text-sm outline-none focus-visible:border-foreground"
           />
           {poll.options.map((opt, i) => (
             <div key={i} className="flex items-center gap-2">
@@ -133,7 +133,7 @@ export function ContentPicker({
                   onChangePoll({ ...poll, options });
                 }}
                 placeholder={`Option ${i + 1}`}
-                className="flex-1 h-9 rounded-[10px] border border-[#e8e8e8] bg-transparent px-3 text-sm outline-none focus-visible:border-foreground"
+                className="flex-1 h-9 rounded-[10px] border border-border bg-transparent px-3 text-sm outline-none focus-visible:border-foreground"
               />
               {poll.options.length > 2 && (
                 <button
@@ -179,7 +179,7 @@ export function ContentPicker({
           {media.map((item) => (
             <div
               key={item.clientId}
-              className="flex items-center gap-2 rounded-[10px] border border-[#e8e8e8] px-3 h-9"
+              className="flex items-center gap-2 rounded-[10px] border border-border px-3 h-9"
             >
               {item.type === "IMAGE" ? (
                 <ImageIcon size={16} strokeWidth={1.6} className="shrink-0" />
@@ -198,7 +198,7 @@ export function ContentPicker({
             </div>
           ))}
           {document && (
-            <div className="flex items-center gap-2 rounded-[10px] border border-[#e8e8e8] px-3 h-9">
+            <div className="flex items-center gap-2 rounded-[10px] border border-border px-3 h-9">
               <FileText size={16} strokeWidth={1.6} className="shrink-0" />
               <span className="text-xs truncate flex-1">{document.file.name}</span>
               <button

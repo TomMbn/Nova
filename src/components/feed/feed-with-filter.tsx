@@ -32,8 +32,8 @@ export function FeedWithFilter({
               className={cn(
                 "shrink-0 px-[10px] py-1 h-6 rounded-[10px] text-[12px] font-bold whitespace-nowrap transition-colors",
                 activeId === cat.id
-                  ? "bg-[#1e1e1e] text-[#e8e8e8]"
-                  : "bg-[#e8e8e8] text-foreground"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-foreground"
               )}
             >
               {cat.name}

@@ -56,7 +56,7 @@ export function BottomNav() {
             return (
               <li key={href}>
                 <Link href={href} aria-label={label}>
-                  <span className="flex items-center justify-center size-[39px] rounded-[10px] bg-[#e8e8e8] transition-opacity active:opacity-60">
+                  <span className="flex items-center justify-center size-[39px] rounded-[10px] bg-muted transition-opacity active:opacity-60">
                     <Icon size={20} strokeWidth={2} className="text-foreground" />
                   </span>
                 </Link>

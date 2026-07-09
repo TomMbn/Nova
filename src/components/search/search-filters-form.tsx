@@ -29,14 +29,14 @@ export function SearchFiltersForm({
         <Search
           size={18}
           strokeWidth={1.8}
-          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#888]"
+          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
         />
         <input
           type="text"
           name="q"
           defaultValue={q ?? ""}
           placeholder="Rechercher un membre"
-          className="w-full h-[52px] rounded-2xl border border-[#e8e8e8] bg-transparent pl-11 pr-4 text-[14px] outline-none placeholder:text-[#888] focus-visible:border-[#1e1e1e]"
+          className="w-full h-[52px] rounded-2xl border border-border bg-transparent pl-11 pr-4 text-[14px] outline-none placeholder:text-muted-foreground focus-visible:border-foreground"
         />
       </div>
 
@@ -51,13 +51,13 @@ export function SearchFiltersForm({
       <div className="flex flex-col items-center gap-4">
         <button
           type="submit"
-          className="w-full h-[48px] rounded-2xl bg-[#e8e8e8] text-[14px] font-bold text-[#1e1e1e] transition-opacity active:opacity-70"
+          className="w-full h-[48px] rounded-2xl bg-muted text-[14px] font-bold text-foreground transition-opacity active:opacity-70"
         >
           Voir les résultats
         </button>
 
         {hasActiveFilters && (
-          <Link href="/recherche" className="text-[13px] text-[#888] hover:underline">
+          <Link href="/recherche" className="text-[13px] text-muted-foreground hover:underline">
             Réinitialiser les filtres
           </Link>
         )}

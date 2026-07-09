@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default async function ProfilPage() {
   const profile = await getCurrentUserProfile();
@@ -123,6 +124,13 @@ export default async function ProfilPage() {
             </CardContent>
           </Card>
         )}
+
+        <Card>
+          <CardContent className="flex flex-col gap-2">
+            <h2 className="text-sm font-medium">Apparence</h2>
+            <ThemeToggle />
+          </CardContent>
+        </Card>
 
         <form action="/logout" method="POST">
           <Button
