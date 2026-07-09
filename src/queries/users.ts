@@ -25,6 +25,10 @@ export async function getCurrentUserProfile() {
       skills: { include: { skill: true } },
       followedTopics: { include: { topic: true } },
       followedCategories: { include: { category: true } },
+      experiences: {
+        include: { company: true },
+        orderBy: { startDate: "desc" },
+      },
     },
   });
 }
