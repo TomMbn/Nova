@@ -42,3 +42,6 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# fichiers uploadés (stockage local, cf. src/lib/media-storage.ts)
+/public/uploads

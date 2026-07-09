@@ -1,13 +1,20 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { User } from "lucide-react";
 import type { FeedPost } from "@/queries/posts";
 import { PostCardMedia } from "./post-card-media";
 import { PostCardActions } from "./post-card-actions";
+import { PostCardMenu } from "./post-card-menu";
 
 function relativeTime(date: Date): string {
   const diffMs = Date.now() - date.getTime();
   const diffH = Math.floor(diffMs / 3_600_000);
-  if (diffH < 1) return "< 1h";
+  if (diffH < 1) {
+    const diffMin = Math.floor(diffMs / 60_000);
+    return diffMin < 1 ? "à l'instant" : `${diffMin}min`;
+  }
   if (diffH < 24) return `${diffH}h`;
   const diffD = Math.floor(diffH / 24);
   if (diffD < 7) return `${diffD}j`;
@@ -15,6 +22,9 @@ function relativeTime(date: Date): string {
 }
 
 export function PostCard({ post }: { post: FeedPost }) {
+  const [deleted, setDeleted] = useState(false);
+  if (deleted) return null;
+
   return (
     <article className="border border-[#e8e8e8] rounded-[10px] p-[10px] flex flex-col gap-[10px]">
 
@@ -36,7 +46,12 @@ export function PostCard({ post }: { post: FeedPost }) {
             </p>
           </div>
         </div>
-        <span className="text-[12px] font-bold shrink-0 mt-0.5">{relativeTime(post.createdAt)}</span>
+        <div className="flex items-center gap-1 shrink-0 mt-0.5">
+          <span className="text-[12px] font-bold">{relativeTime(post.createdAt)}</span>
+          {post.isAuthor && (
+            <PostCardMenu postId={post.id} onDeleted={() => setDeleted(true)} />
+          )}
+        </div>
       </div>
 
       {/* Badges : catégorie (#e8e8e8) + thématiques (#f7f7f7) */}

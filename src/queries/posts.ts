@@ -42,7 +42,7 @@ type PostBaseRow = {
 
 // Sérialise le tronc commun d'un post (ids en `string`, état perso en booléens)
 // → passable tel quel à un Client Component via le rendu RSC.
-function serializePostBase(post: PostBaseRow) {
+function serializePostBase(post: PostBaseRow, viewerId: bigint) {
   return {
     id: String(post.id),
     content: post.content,
@@ -64,6 +64,28 @@ function serializePostBase(post: PostBaseRow) {
     counts: { likes: post._count.likes, comments: post._count.comments },
     isLiked: post.likes.length > 0,
     isBookmarked: post.bookmarks.length > 0,
+    isAuthor: post.author.id === viewerId,
+  };
+}
+
+// Sérialise un sondage avec ses résultats (comptes par option + vote de
+// l'utilisateur courant) — partagé par le fil et le détail d'un post.
+function serializePoll(poll: {
+  id: bigint;
+  question: string;
+  options: { id: bigint; label: string; _count: { votes: number } }[];
+  votes: { optionId: bigint }[];
+}) {
+  return {
+    id: String(poll.id),
+    question: poll.question,
+    options: poll.options.map((o) => ({
+      id: String(o.id),
+      label: o.label,
+      votes: o._count.votes,
+    })),
+    totalVotes: poll.options.reduce((s, o) => s + o._count.votes, 0),
+    votedOptionId: poll.votes.length > 0 ? String(poll.votes[0].optionId) : null,
   };
 }
 
@@ -79,8 +101,15 @@ export type FeedPost = {
   counts: { likes: number; comments: number };
   isLiked: boolean;
   isBookmarked: boolean;
+  isAuthor: boolean;
   media: { id: string; type: string; url: string; position: number }[];
-  poll: { id: string; question: string; options: { id: string; label: string }[] } | null;
+  poll: {
+    id: string;
+    question: string;
+    options: { id: string; label: string; votes: number }[];
+    totalVotes: number;
+    votedOptionId: string | null;
+  } | null;
 };
 
 type FeedParams = {
@@ -127,7 +156,11 @@ export async function getFeed(params: FeedParams = {}) {
         select: {
           id: true,
           question: true,
-          options: { select: { id: true, label: true }, orderBy: { id: "asc" as const } },
+          options: {
+            select: { id: true, label: true, _count: { select: { votes: true } } },
+            orderBy: { id: "asc" as const },
+          },
+          votes: { where: { userId: viewerId }, select: { optionId: true } },
         },
       },
     },
@@ -136,20 +169,14 @@ export async function getFeed(params: FeedParams = {}) {
   const hasMore = rows.length > limit;
   const page = hasMore ? rows.slice(0, limit) : rows;
   const posts = page.map((row) => ({
-    ...serializePostBase(row),
+    ...serializePostBase(row, viewerId),
     media: row.media.map((m) => ({
       id: String(m.id),
       type: m.type,
       url: m.url,
       position: m.position,
     })),
-    poll: row.poll
-      ? {
-          id: String(row.poll.id),
-          question: row.poll.question,
-          options: row.poll.options.map((o) => ({ id: String(o.id), label: o.label })),
-        }
-      : null,
+    poll: row.poll ? serializePoll(row.poll) : null,
   }));
   const nextCursor = hasMore ? posts[posts.length - 1].id : null;
 
@@ -176,7 +203,11 @@ export async function getBookmarkedPosts(): Promise<FeedPost[]> {
         select: {
           id: true,
           question: true,
-          options: { select: { id: true, label: true }, orderBy: { id: "asc" as const } },
+          options: {
+            select: { id: true, label: true, _count: { select: { votes: true } } },
+            orderBy: { id: "asc" as const },
+          },
+          votes: { where: { userId: viewerId }, select: { optionId: true } },
         },
       },
       bookmarks: { where: { userId: viewerId }, select: { createdAt: true } },
@@ -188,20 +219,14 @@ export async function getBookmarkedPosts(): Promise<FeedPost[]> {
   rows.sort((a, b) => b.bookmarks[0].createdAt.getTime() - a.bookmarks[0].createdAt.getTime());
 
   return rows.map((row) => ({
-    ...serializePostBase(row),
+    ...serializePostBase(row, viewerId),
     media: row.media.map((m) => ({
       id: String(m.id),
       type: m.type,
       url: m.url,
       position: m.position,
     })),
-    poll: row.poll
-      ? {
-          id: String(row.poll.id),
-          question: row.poll.question,
-          options: row.poll.options.map((o) => ({ id: String(o.id), label: o.label })),
-        }
-      : null,
+    poll: row.poll ? serializePoll(row.poll) : null,
   }));
 }
 
@@ -224,7 +249,17 @@ export async function getPostById(id: string | number | bigint) {
     include: {
       ...POST_BASE_INCLUDE(viewerId),
       media: { orderBy: { position: "asc" } },
-      poll: { include: { options: true } },
+      poll: {
+        select: {
+          id: true,
+          question: true,
+          options: {
+            select: { id: true, label: true, _count: { select: { votes: true } } },
+            orderBy: { id: "asc" },
+          },
+          votes: { where: { userId: viewerId }, select: { optionId: true } },
+        },
+      },
       comments: {
         orderBy: { createdAt: "asc" },
         include: {
@@ -237,23 +272,14 @@ export async function getPostById(id: string | number | bigint) {
   if (!post) return null;
 
   return {
-    ...serializePostBase(post),
+    ...serializePostBase(post, viewerId),
     media: post.media.map((m) => ({
       id: String(m.id),
       type: m.type,
       url: m.url,
       position: m.position,
     })),
-    poll: post.poll
-      ? {
-          id: String(post.poll.id),
-          question: post.poll.question,
-          options: post.poll.options.map((o) => ({
-            id: String(o.id),
-            label: o.label,
-          })),
-        }
-      : null,
+    poll: post.poll ? serializePoll(post.poll) : null,
     comments: post.comments.map((c) => ({
       id: String(c.id),
       content: c.content,
