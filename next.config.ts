@@ -13,6 +13,13 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "30mb",
     },
   },
+  // Le client Prisma est généré hors de l'emplacement par défaut
+  // (src/generated/prisma) : le file tracing de Next.js ne l'embarque pas
+  // automatiquement dans le bundle des fonctions serverless Vercel, d'où le
+  // moteur binaire introuvable au runtime malgré binaryTargets dans schema.prisma.
+  outputFileTracingIncludes: {
+    "/**": ["./src/generated/prisma/**/*"],
+  },
 };
 
 export default nextConfig;
