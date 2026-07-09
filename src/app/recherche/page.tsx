@@ -1,15 +1,14 @@
 import { searchUsers } from "@/queries/users";
-import { getRoles, getClasses, getSkills } from "@/queries/referentials";
+import { getRoles, getSkills, getCompanies } from "@/queries/referentials";
 import { BottomNav } from "@/components/bottom-nav";
-import { SearchHeader } from "@/components/search/search-header";
-import { FilterChips } from "@/components/search/filter-chips";
+import { SearchFiltersForm } from "@/components/search/search-filters-form";
 import { MemberResults, type Member } from "@/components/search/member-results";
 
 type SearchParams = {
   q?: string;
   roleId?: string;
-  classId?: string;
   skillId?: string;
+  companyId?: string;
 };
 
 export default async function RecherchePage({
@@ -17,50 +16,45 @@ export default async function RecherchePage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const { q, roleId, classId, skillId } = await searchParams;
+  const { q, roleId, skillId, companyId } = await searchParams;
+  const hasActiveFilters = Boolean(q || roleId || skillId || companyId);
 
-  const [users, roles, classes, skills] = await Promise.all([
-    searchUsers({ name: q, roleId, classId, skillId }),
+  const [roles, skills, companies] = await Promise.all([
     getRoles(),
-    getClasses(),
     getSkills(),
+    getCompanies(),
   ]);
 
-  const members: Member[] = users.map((user) => ({
-    id: String(user.id),
-    name: user.name,
-    avatarUrl: user.avatarUrl,
-    role: user.role.name,
-    className: user.currentClass?.name ?? null,
-    skills: user.skills.map((s) => s.skill.name),
-  }));
+  const members: Member[] | null = hasActiveFilters
+    ? (await searchUsers({ name: q, roleId, skillId, companyId })).map((user) => ({
+        id: String(user.id),
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+        role: user.role.name,
+        className: user.currentClass?.name ?? null,
+        skills: user.skills.map((s) => s.skill.name),
+      }))
+    : null;
 
   return (
     <>
       <div className="flex flex-col min-h-full pb-20">
-        <SearchHeader q={q} roleId={roleId} classId={classId} skillId={skillId} />
+        <SearchFiltersForm
+          q={q}
+          roleId={roleId}
+          skillId={skillId}
+          companyId={companyId}
+          roles={roles.map((r) => ({ id: String(r.id), name: r.name }))}
+          skills={skills.map((s) => ({ id: String(s.id), name: s.name }))}
+          companies={companies.map((c) => ({ id: String(c.id), name: c.name }))}
+          hasActiveFilters={hasActiveFilters}
+        />
 
-        <div className="flex flex-col gap-3 pt-1 pb-3">
-          <FilterChips
-            paramName="roleId"
-            label="Rôle"
-            options={roles.map((r) => ({ id: String(r.id), name: r.name }))}
-          />
-          <FilterChips
-            paramName="classId"
-            label="Classe"
-            options={classes.map((c) => ({ id: String(c.id), name: c.name }))}
-          />
-          <FilterChips
-            paramName="skillId"
-            label="Compétence"
-            options={skills.map((s) => ({ id: String(s.id), name: s.name }))}
-          />
-        </div>
-
-        <main className="flex-1 px-3">
-          <MemberResults members={members} />
-        </main>
+        {members && (
+          <main className="flex-1 px-3 pt-6">
+            <MemberResults members={members} />
+          </main>
+        )}
       </div>
       <BottomNav />
     </>

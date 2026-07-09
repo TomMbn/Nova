@@ -30,7 +30,7 @@ export async function loginOrSignup(
     }
 
     const role = await prisma.role.findFirstOrThrow({
-      where: { name: "Élève actuel" },
+      where: { name: "Élève" },
     });
     const passwordHash = await bcrypt.hash(password, 10);
 

@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 const ROLES = [
-  "Élève actuel",
+  "Élève",
   "Alumni",
   "Intervenant",
   "Équipe pédagogique",
@@ -19,6 +19,30 @@ const TOPICS = [
   { slug: "data", name: "Data" },
   { slug: "marketing", name: "Marketing" },
   { slug: "design", name: "Design" },
+];
+
+const SKILLS = [
+  "Développement Web",
+  "UX/UI Design",
+  "Data Science",
+  "Growth Marketing",
+  "Gestion de projet",
+  "DevOps",
+  "Illustration",
+  "Rédaction",
+  "Cybersécurité",
+  "Product Management",
+];
+
+const COMPANIES = [
+  "Google",
+  "Doctolib",
+  "Ubisoft",
+  "OpenClassrooms",
+  "Freelance",
+  "BlaBlaCar",
+  "Capgemini",
+  "Station F",
 ];
 
 // Bac +2 : formations en 2 ans → une classe B1 et une classe B2 chacune.
@@ -78,35 +102,44 @@ async function main() {
   for (const name of CLASSES) {
     await prisma.class.upsert({ where: { name }, update: {}, create: { name } });
   }
+  for (const name of SKILLS) {
+    await prisma.skill.upsert({ where: { name }, update: {}, create: { name } });
+  }
+  for (const name of COMPANIES) {
+    await prisma.company.upsert({ where: { name }, update: {}, create: { name } });
+  }
 
   // --- Utilisateurs de démo ---
   const passwordHash = await bcrypt.hash("password123", 10);
 
   const roleAlumni = await prisma.role.findFirstOrThrow({ where: { name: "Alumni" } });
-  const roleEleve = await prisma.role.findFirstOrThrow({ where: { name: "Élève actuel" } });
+  const roleEleve = await prisma.role.findFirstOrThrow({ where: { name: "Élève" } });
   const roleIntervenant = await prisma.role.findFirstOrThrow({ where: { name: "Intervenant" } });
+  const rolePedago = await prisma.role.findFirstOrThrow({ where: { name: "Équipe pédagogique" } });
   const classDataIA = await prisma.class.findFirstOrThrow({ where: { name: "Bachelor Data Analyst et IA - B3" } });
 
   const julie = await prisma.user.upsert({
     where: { email: "julie@demo.fr" },
-    update: {},
+    update: { avatarUrl: "https://i.pravatar.cc/300?img=47" },
     create: {
       email: "julie@demo.fr",
       passwordHash,
       name: "Julie Martin",
       bio: "Développeuse full-stack passionnée par le web.",
+      avatarUrl: "https://i.pravatar.cc/300?img=47",
       roleId: roleAlumni.id,
     },
   });
 
   const thomas = await prisma.user.upsert({
     where: { email: "thomas@demo.fr" },
-    update: { currentClassId: classDataIA.id },
+    update: { currentClassId: classDataIA.id, avatarUrl: "https://i.pravatar.cc/300?img=12" },
     create: {
       email: "thomas@demo.fr",
       passwordHash,
       name: "Thomas Dupont",
       bio: "Étudiant en 3e année, passionné de data.",
+      avatarUrl: "https://i.pravatar.cc/300?img=12",
       roleId: roleEleve.id,
       currentClassId: classDataIA.id,
     },
@@ -114,15 +147,124 @@ async function main() {
 
   const sofia = await prisma.user.upsert({
     where: { email: "sofia@demo.fr" },
-    update: {},
+    update: { avatarUrl: "https://i.pravatar.cc/300?img=32" },
     create: {
       email: "sofia@demo.fr",
       passwordHash,
       name: "Sofia Benali",
       bio: "Designer UX/UI freelance, intervenante.",
+      avatarUrl: "https://i.pravatar.cc/300?img=32",
       roleId: roleIntervenant.id,
     },
   });
+
+  const marc = await prisma.user.upsert({
+    where: { email: "marc@demo.fr" },
+    update: { avatarUrl: "https://i.pravatar.cc/300?img=68" },
+    create: {
+      email: "marc@demo.fr",
+      passwordHash,
+      name: "Marc Lefèvre",
+      bio: "Responsable pédagogique, toujours partant pour un café.",
+      avatarUrl: "https://i.pravatar.cc/300?img=68",
+      roleId: rolePedago.id,
+    },
+  });
+
+  // --- Compétences des membres ---
+  const skillByName = async (name: string) =>
+    prisma.skill.findFirstOrThrow({ where: { name } });
+
+  const userSkills: [bigint, string][] = [
+    [julie.id, "Développement Web"],
+    [julie.id, "DevOps"],
+    [julie.id, "Cybersécurité"],
+    [thomas.id, "Data Science"],
+    [thomas.id, "Gestion de projet"],
+    [sofia.id, "UX/UI Design"],
+    [sofia.id, "Illustration"],
+    [marc.id, "Gestion de projet"],
+    [marc.id, "Rédaction"],
+  ];
+  for (const [userId, skillName] of userSkills) {
+    const skill = await skillByName(skillName);
+    await prisma.userSkill.upsert({
+      where: { userId_skillId: { userId, skillId: skill.id } },
+      update: {},
+      create: { userId, skillId: skill.id },
+    });
+  }
+
+  // --- Expériences professionnelles ---
+  const companyByName = async (name: string) =>
+    prisma.company.findFirstOrThrow({ where: { name } });
+
+  const companyDoctolib = await companyByName("Doctolib");
+  const companyCapgemini = await companyByName("Capgemini");
+  const companyBlaBlaCar = await companyByName("BlaBlaCar");
+  const companyGoogle = await companyByName("Google");
+  const companyFreelance = await companyByName("Freelance");
+
+  // `experience.id` est une identity column GENERATED ALWAYS côté Postgres :
+  // impossible d'upsert sur un id explicite (pas de OVERRIDING SYSTEM VALUE
+  // via Prisma). On dédoublonne donc par (userId, companyId, title).
+  const experiences: {
+    userId: bigint;
+    companyId: bigint;
+    title: string;
+    startDate: Date;
+    endDate: Date | null;
+    isCurrent: boolean;
+  }[] = [
+    {
+      userId: julie.id,
+      companyId: companyDoctolib.id,
+      title: "Développeuse Full-Stack",
+      startDate: new Date("2023-01-15"),
+      endDate: null,
+      isCurrent: true,
+    },
+    {
+      userId: julie.id,
+      companyId: companyCapgemini.id,
+      title: "Alternante développeuse",
+      startDate: new Date("2021-09-01"),
+      endDate: new Date("2022-12-31"),
+      isCurrent: false,
+    },
+    {
+      userId: thomas.id,
+      companyId: companyBlaBlaCar.id,
+      title: "Stagiaire Data Analyst",
+      startDate: new Date("2025-06-01"),
+      endDate: new Date("2025-08-31"),
+      isCurrent: false,
+    },
+    {
+      userId: sofia.id,
+      companyId: companyFreelance.id,
+      title: "Designer UX/UI freelance",
+      startDate: new Date("2020-01-01"),
+      endDate: null,
+      isCurrent: true,
+    },
+    {
+      userId: marc.id,
+      companyId: companyGoogle.id,
+      title: "Chef de projet digital",
+      startDate: new Date("2016-03-01"),
+      endDate: new Date("2019-08-31"),
+      isCurrent: false,
+    },
+  ];
+  for (const exp of experiences) {
+    const existing = await prisma.experience.findFirst({
+      where: { userId: exp.userId, companyId: exp.companyId, title: exp.title },
+    });
+    if (!existing) {
+      await prisma.experience.create({ data: exp });
+    }
+  }
 
   // --- Catégories & thématiques ---
   const catEntraide = await prisma.category.findFirstOrThrow({ where: { name: "Entraide" } });
@@ -134,6 +276,44 @@ async function main() {
   const topicUX = await prisma.topic.findFirstOrThrow({ where: { slug: "ux-ui" } });
   const topicDesign = await prisma.topic.findFirstOrThrow({ where: { slug: "design" } });
   const topicData = await prisma.topic.findFirstOrThrow({ where: { slug: "data" } });
+  const topicMarketing = await prisma.topic.findFirstOrThrow({ where: { slug: "marketing" } });
+
+  // --- Préférences de notif (thématiques & catégories suivies) ---
+  const followedTopics: [bigint, bigint][] = [
+    [julie.id, topicDev.id],
+    [julie.id, topicData.id],
+    [thomas.id, topicData.id],
+    [thomas.id, topicDev.id],
+    [sofia.id, topicUX.id],
+    [sofia.id, topicDesign.id],
+    [marc.id, topicMarketing.id],
+    [marc.id, topicDesign.id],
+  ];
+  for (const [userId, topicId] of followedTopics) {
+    await prisma.followedTopic.upsert({
+      where: { userId_topicId: { userId, topicId } },
+      update: {},
+      create: { userId, topicId },
+    });
+  }
+
+  const followedCategories: [bigint, bigint][] = [
+    [julie.id, catEntraide.id],
+    [julie.id, catProjet.id],
+    [thomas.id, catProjet.id],
+    [thomas.id, catAnnonce.id],
+    [sofia.id, catAnnonce.id],
+    [sofia.id, catEvenement.id],
+    [marc.id, catEvenement.id],
+    [marc.id, catAnnonce.id],
+  ];
+  for (const [userId, categoryId] of followedCategories) {
+    await prisma.followedCategory.upsert({
+      where: { userId_categoryId: { userId, categoryId } },
+      update: {},
+      create: { userId, categoryId },
+    });
+  }
 
   // --- Posts de démo ---
 
@@ -199,9 +379,9 @@ async function main() {
     update: {},
     create: { postId: post3.id, topicId: topicData.id },
   });
-  const existingPoll = await prisma.poll.findUnique({ where: { postId: post3.id } });
-  if (!existingPoll) {
-    const poll = await prisma.poll.create({
+  let poll = await prisma.poll.findUnique({ where: { postId: post3.id } });
+  if (!poll) {
+    poll = await prisma.poll.create({
       data: { postId: post3.id, question: "Quel outil de dataviz ?" },
     });
     await prisma.pollOption.createMany({
@@ -258,9 +438,134 @@ async function main() {
     create: { postId: post5.id, topicId: topicDev.id },
   });
 
-  // --- Formations vidéo ---
-  const topicMarketing = await prisma.topic.findFirstOrThrow({ where: { slug: "marketing" } });
+  // --- Likes, bookmarks, votes, commentaires ---
+  const postLikes: [bigint, bigint][] = [
+    [thomas.id, post1.id],
+    [sofia.id, post1.id],
+    [marc.id, post1.id],
+    [julie.id, post2.id],
+    [thomas.id, post2.id],
+    [sofia.id, post4.id],
+    [marc.id, post4.id],
+    [thomas.id, post4.id],
+  ];
+  for (const [userId, postId] of postLikes) {
+    await prisma.postLike.upsert({
+      where: { userId_postId: { userId, postId } },
+      update: {},
+      create: { userId, postId },
+    });
+  }
 
+  const bookmarks: [bigint, bigint][] = [
+    [sofia.id, post1.id],
+    [julie.id, post4.id],
+  ];
+  for (const [userId, postId] of bookmarks) {
+    await prisma.bookmark.upsert({
+      where: { userId_postId: { userId, postId } },
+      update: {},
+      create: { userId, postId },
+    });
+  }
+
+  const pollOptions = await prisma.pollOption.findMany({ where: { pollId: poll.id } });
+  const optionByLabel = (label: string) =>
+    pollOptions.find((o) => o.label === label)!;
+
+  const votes: [bigint, string][] = [
+    [julie.id, "Metabase"],
+    [sofia.id, "Power BI"],
+    [marc.id, "Tableau"],
+  ];
+  for (const [userId, label] of votes) {
+    const option = optionByLabel(label);
+    await prisma.vote.upsert({
+      where: { userId_pollId: { userId, pollId: poll.id } },
+      update: {},
+      create: { userId, pollId: poll.id, optionId: option.id },
+    });
+  }
+
+  // `comment.id` est aussi une identity column GENERATED ALWAYS : on
+  // dédoublonne par (authorId, postId, content) plutôt que par id explicite.
+  const comments: { authorId: bigint; postId: bigint; content: string }[] = [
+    {
+      authorId: sofia.id,
+      postId: post1.id,
+      content: "Regarde du côté de NextAuth, ça gère bien les refresh tokens.",
+    },
+    {
+      authorId: marc.id,
+      postId: post1.id,
+      content: "Bon sujet, ça intéressera sûrement d'autres élèves.",
+    },
+    {
+      authorId: thomas.id,
+      postId: post4.id,
+      content: "Hâte d'y être !",
+    },
+  ];
+  for (const comment of comments) {
+    const existing = await prisma.comment.findFirst({ where: comment });
+    if (!existing) {
+      await prisma.comment.create({ data: comment });
+    }
+  }
+
+  // --- Messagerie privée ---
+  // `message.id` idem : dédoublonnage par (senderId, receiverId, content).
+  const messages: {
+    senderId: bigint;
+    receiverId: bigint;
+    content: string;
+    readAt: Date | null;
+  }[] = [
+    {
+      senderId: thomas.id,
+      receiverId: julie.id,
+      content: "Salut Julie, je voulais te demander des conseils sur les API REST.",
+      readAt: new Date(),
+    },
+    {
+      senderId: julie.id,
+      receiverId: thomas.id,
+      content: "Avec plaisir ! On peut en discuter après le cours ?",
+      readAt: new Date(),
+    },
+    {
+      senderId: thomas.id,
+      receiverId: julie.id,
+      content: "Parfait, à toute à l'heure !",
+      readAt: null,
+    },
+    {
+      senderId: sofia.id,
+      receiverId: marc.id,
+      content: "Bonjour Marc, le draft du planning de l'atelier Figma est prêt.",
+      readAt: new Date(),
+    },
+    {
+      senderId: marc.id,
+      receiverId: sofia.id,
+      content: "Merci Sofia, je regarde ça aujourd'hui.",
+      readAt: null,
+    },
+  ];
+  for (const message of messages) {
+    const existing = await prisma.message.findFirst({
+      where: {
+        senderId: message.senderId,
+        receiverId: message.receiverId,
+        content: message.content,
+      },
+    });
+    if (!existing) {
+      await prisma.message.create({ data: message });
+    }
+  }
+
+  // --- Formations vidéo ---
   const video1 = await prisma.formationVideo.upsert({
     where: { id: BigInt(1) },
     update: {},
@@ -388,7 +693,32 @@ async function main() {
     create: { sessionId: session3.id, topicId: topicMarketing.id },
   });
 
-  console.log("✓ Seed terminé — 3 utilisateurs, 5 posts, 3 vidéos, 3 sessions");
+  // --- Inscriptions & avis (réservés aux Alumni, cf. CLAUDE.md) ---
+  await prisma.formationRegistration.upsert({
+    where: { userId_sessionId: { userId: julie.id, sessionId: session1.id } },
+    update: {},
+    create: { userId: julie.id, sessionId: session1.id, status: "CONFIRMED" },
+  });
+  await prisma.formationRegistration.upsert({
+    where: { userId_sessionId: { userId: julie.id, sessionId: session3.id } },
+    update: {},
+    create: { userId: julie.id, sessionId: session3.id, status: "CONFIRMED" },
+  });
+
+  await prisma.review.upsert({
+    where: { userId_sessionId: { userId: julie.id, sessionId: session3.id } },
+    update: {},
+    create: {
+      userId: julie.id,
+      sessionId: session3.id,
+      rating: 5,
+      comment: "Formation très complète, formateur au top !",
+    },
+  });
+
+  console.log(
+    "✓ Seed terminé — 4 utilisateurs, 5 posts (likes/bookmarks/votes/commentaires), 5 messages, 3 vidéos, 3 sessions (inscriptions + avis)"
+  );
 }
 
 main()
