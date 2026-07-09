@@ -14,7 +14,7 @@ const NO_USER = BigInt(-1);
 // compteurs, état perso), sérialisés par `serializePostBase`.
 const POST_BASE_INCLUDE = (viewerId: bigint) =>
   ({
-    author: { select: { id: true, name: true, avatarUrl: true } },
+    author: { select: { id: true, name: true, avatarUrl: true, role: { select: { name: true } } } },
     category: { select: { id: true, name: true } },
     topics: {
       include: { topic: { select: { id: true, name: true, slug: true } } },
@@ -32,7 +32,7 @@ type PostBaseRow = {
   createdAt: Date;
   eventDate: Date | null;
   location: string | null;
-  author: { id: bigint; name: string; avatarUrl: string | null };
+  author: { id: bigint; name: string; avatarUrl: string | null; role: { name: string } };
   category: { id: bigint; name: string };
   topics: { topic: { id: bigint; name: string; slug: string } }[];
   _count: { likes: number; comments: number };
@@ -53,6 +53,7 @@ function serializePostBase(post: PostBaseRow) {
       id: String(post.author.id),
       name: post.author.name,
       avatarUrl: post.author.avatarUrl,
+      role: post.author.role.name,
     },
     category: { id: String(post.category.id), name: post.category.name },
     topics: post.topics.map((t) => ({
@@ -65,6 +66,22 @@ function serializePostBase(post: PostBaseRow) {
     isBookmarked: post.bookmarks.length > 0,
   };
 }
+
+export type FeedPost = {
+  id: string;
+  content: string | null;
+  createdAt: Date;
+  eventDate: Date | null;
+  location: string | null;
+  author: { id: string; name: string; avatarUrl: string | null; role: string };
+  category: { id: string; name: string };
+  topics: { id: string; name: string; slug: string }[];
+  counts: { likes: number; comments: number };
+  isLiked: boolean;
+  isBookmarked: boolean;
+  media: { id: string; type: string; url: string; position: number }[];
+  poll: { id: string; question: string; options: { id: string; label: string }[] } | null;
+};
 
 type FeedParams = {
   cursor?: string | number | bigint | null;
@@ -103,12 +120,37 @@ export async function getFeed(params: FeedParams = {}) {
     orderBy: { id: "desc" },
     take: limit + 1, // +1 sentinelle pour détecter la page suivante
     ...(cursorId !== null && { cursor: { id: cursorId }, skip: 1 }),
-    include: POST_BASE_INCLUDE(viewerId),
+    include: {
+      ...POST_BASE_INCLUDE(viewerId),
+      media: { orderBy: { position: "asc" as const } },
+      poll: {
+        select: {
+          id: true,
+          question: true,
+          options: { select: { id: true, label: true }, orderBy: { id: "asc" as const } },
+        },
+      },
+    },
   });
 
   const hasMore = rows.length > limit;
   const page = hasMore ? rows.slice(0, limit) : rows;
-  const posts = page.map(serializePostBase);
+  const posts = page.map((row) => ({
+    ...serializePostBase(row),
+    media: row.media.map((m) => ({
+      id: String(m.id),
+      type: m.type,
+      url: m.url,
+      position: m.position,
+    })),
+    poll: row.poll
+      ? {
+          id: String(row.poll.id),
+          question: row.poll.question,
+          options: row.poll.options.map((o) => ({ id: String(o.id), label: o.label })),
+        }
+      : null,
+  }));
   const nextCursor = hasMore ? posts[posts.length - 1].id : null;
 
   return { posts, nextCursor };
@@ -137,7 +179,7 @@ export async function getPostById(id: string | number | bigint) {
       comments: {
         orderBy: { createdAt: "asc" },
         include: {
-          author: { select: { id: true, name: true, avatarUrl: true } },
+          author: { select: { id: true, name: true, avatarUrl: true, role: { select: { name: true } } } },
         },
       },
     },

@@ -1,14 +1,42 @@
+import { Suspense } from "react";
+import { getFeed } from "@/queries/posts";
+import { getCategories } from "@/queries/referentials";
 import { BottomNav } from "@/components/bottom-nav";
+import { TopBar } from "@/components/feed/top-bar";
+import { CategoryFilter } from "@/components/feed/category-filter";
+import { FeedList } from "@/components/feed/feed-list";
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ categoryId?: string }>;
+}) {
+  const { categoryId } = await searchParams;
+
+  const [{ posts }, categories] = await Promise.all([
+    getFeed({ categoryId }),
+    getCategories(),
+  ]);
+
+  const serializedCategories = categories.map((c) => ({
+    id: String(c.id),
+    name: c.name,
+  }));
+
   return (
     <>
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 pb-24 text-center">
-        <h1 className="text-3xl font-semibold tracking-tight">École Communauté</h1>
-        <p className="max-w-md text-muted-foreground">
-          Base du projet — chaque équipe branche sa sous-partie ici.
-        </p>
+      <div className="flex flex-col min-h-full pb-20">
+        <TopBar />
+
+        <Suspense>
+          <CategoryFilter categories={serializedCategories} />
+        </Suspense>
+
+        <main className="flex-1 pt-1">
+          <FeedList posts={posts} />
+        </main>
       </div>
+
       <BottomNav />
     </>
   );
