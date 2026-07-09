@@ -24,7 +24,7 @@ function formatTime(date: Date) {
 }
 
 export function Conversation({ partnerId, currentUserId, initialMessages }: Props) {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>([...initialMessages].reverse());
   const [content, setContent] = useState("");
   const [isSending, setIsSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -35,7 +35,7 @@ export function Conversation({ partnerId, currentUserId, initialMessages }: Prop
       const res = await fetch(`/api/messages/${partnerId}`);
       if (!res.ok) return;
       const data = await res.json();
-      setMessages(data.messages);
+      setMessages([...data.messages].reverse());
     } catch {
       // silencieux
     }
