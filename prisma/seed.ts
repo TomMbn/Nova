@@ -315,17 +315,20 @@ async function main() {
   });
 
   // --- Formations en présentiel ---
+  // Suppression complète pour forcer la recréation avec tous les champs
+  await prisma.formationSessionTopic.deleteMany({});
+  await prisma.formationRegistration.deleteMany({});
+  await prisma.review.deleteMany({});
+  await prisma.formationSession.deleteMany({});
+
   const now = new Date();
 
-  const session1 = await prisma.formationSession.upsert({
-    where: { id: BigInt(1) },
-    update: {},
-    create: {
-      id: BigInt(1),
+  const session1 = await prisma.formationSession.create({
+    data: {
       title: "Workshop Figma avancé",
       description: "Composants, variables et auto-layout : maîtrisez Figma pour des designs scalables et maintenables en équipe. Apprenez à structurer un design system robuste et à travailler efficacement en équipe sur des projets complexes.",
       date: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
-      location: "Campus principal — Salle B204",
+      location: "Salle B204 — Campus Lyon",
       status: "OPEN",
       cpfUrl: "https://www.moncompteformation.gouv.fr",
       imageUrl: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80",
@@ -333,26 +336,19 @@ async function main() {
       capacity: 20,
     },
   });
-  await prisma.formationSessionTopic.upsert({
-    where: { sessionId_topicId: { sessionId: session1.id, topicId: topicDesign.id } },
-    update: {},
-    create: { sessionId: session1.id, topicId: topicDesign.id },
-  });
-  await prisma.formationSessionTopic.upsert({
-    where: { sessionId_topicId: { sessionId: session1.id, topicId: topicUX.id } },
-    update: {},
-    create: { sessionId: session1.id, topicId: topicUX.id },
+  await prisma.formationSessionTopic.createMany({
+    data: [
+      { sessionId: session1.id, topicId: topicDesign.id },
+      { sessionId: session1.id, topicId: topicUX.id },
+    ],
   });
 
-  const session2 = await prisma.formationSession.upsert({
-    where: { id: BigInt(2) },
-    update: {},
-    create: {
-      id: BigInt(2),
+  const session2 = await prisma.formationSession.create({
+    data: {
       title: "Python pour la Data Science",
       description: "Pandas, NumPy, Matplotlib et Scikit-learn : construisez vos premiers pipelines de données et modèles prédictifs. Une journée intensive pour passer de zéro à l'analyse de données réelles.",
       date: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000),
-      location: "Campus principal — Amphi B",
+      location: "Amphi B — Campus Lyon",
       status: "OPEN",
       cpfUrl: "https://www.moncompteformation.gouv.fr",
       imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80",
@@ -360,21 +356,16 @@ async function main() {
       capacity: 30,
     },
   });
-  await prisma.formationSessionTopic.upsert({
-    where: { sessionId_topicId: { sessionId: session2.id, topicId: topicData.id } },
-    update: {},
-    create: { sessionId: session2.id, topicId: topicData.id },
+  await prisma.formationSessionTopic.create({
+    data: { sessionId: session2.id, topicId: topicData.id },
   });
 
-  const session3 = await prisma.formationSession.upsert({
-    where: { id: BigInt(3) },
-    update: {},
-    create: {
-      id: BigInt(3),
+  const session3 = await prisma.formationSession.create({
+    data: {
       title: "Growth Hacking & SEO",
       description: "Stratégies d'acquisition, SEO technique, A/B testing et analytics : accélérez la croissance de vos projets digitaux. Formation intensive avec études de cas réels.",
       date: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
-      location: "En ligne (Zoom)",
+      location: "En ligne — Zoom",
       status: "DONE",
       cpfUrl: "https://www.moncompteformation.gouv.fr",
       imageUrl: "https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=800&q=80",
@@ -382,10 +373,8 @@ async function main() {
       capacity: 15,
     },
   });
-  await prisma.formationSessionTopic.upsert({
-    where: { sessionId_topicId: { sessionId: session3.id, topicId: topicMarketing.id } },
-    update: {},
-    create: { sessionId: session3.id, topicId: topicMarketing.id },
+  await prisma.formationSessionTopic.create({
+    data: { sessionId: session3.id, topicId: topicMarketing.id },
   });
 
   console.log("✓ Seed terminé — 3 utilisateurs, 5 posts, 3 vidéos, 3 sessions");

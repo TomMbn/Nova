@@ -5,6 +5,23 @@ import { getSessionUserId } from "@/lib/auth";
 import { toBigInt } from "@/lib/bigint";
 import { ok, fail, type ActionResult } from "@/lib/action";
 
+// Retourne l'inscription CONFIRMED de l'utilisateur courant pour une session, ou null.
+export async function getMyRegistration(
+  sessionId: string
+): Promise<{ id: string } | null> {
+  const userId = await getSessionUserId();
+  if (!userId) return null;
+
+  const sid = toBigInt(sessionId);
+  if (sid === null) return null;
+
+  const reg = await prisma.formationRegistration.findFirst({
+    where: { userId, sessionId: sid, status: "CONFIRMED" },
+    select: { id: true },
+  });
+  return reg ? { id: String(reg.id) } : null;
+}
+
 // Inscrit l'utilisateur courant (alumni uniquement) à une session présentielle.
 // Renvoie l'URL CPF de la session pour redirection côté client.
 export async function registerForSession(
@@ -31,7 +48,18 @@ export async function registerForSession(
   const existing = await prisma.formationRegistration.findUnique({
     where: { userId_sessionId: { userId, sessionId: sid } },
   });
-  if (existing) return fail("Vous êtes déjà inscrit à cette session.");
+
+  if (existing) {
+    if (existing.status === "CONFIRMED")
+      return ok({ id: String(existing.id), cpfUrl: session.cpfUrl });
+    // CANCELLED → réactiver
+    const updated = await prisma.formationRegistration.update({
+      where: { id: existing.id },
+      data: { status: "CONFIRMED" },
+      select: { id: true },
+    });
+    return ok({ id: String(updated.id), cpfUrl: session.cpfUrl });
+  }
 
   try {
     const registration = await prisma.formationRegistration.create({

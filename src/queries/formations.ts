@@ -19,10 +19,16 @@ export type FormationSession = {
   imageUrl: string | null;
   level: string | null;
   capacity: number | null;
+  registeredCount: number;
   topics: { id: string; name: string; slug: string }[];
 };
 
-function serializeSession(r: {
+const SESSION_INCLUDE = {
+  topics: { include: { topic: { select: { id: true, name: true, slug: true } } } },
+  _count: { select: { registrations: { where: { status: "CONFIRMED" } } } },
+} as const;
+
+type SessionRow = {
   id: bigint;
   title: string;
   description: string;
@@ -34,7 +40,10 @@ function serializeSession(r: {
   level: string | null;
   capacity: number | null;
   topics: { topic: { id: bigint; name: string; slug: string } }[];
-}): FormationSession {
+  _count: { registrations: number };
+};
+
+function serializeSession(r: SessionRow): FormationSession {
   return {
     id: String(r.id),
     title: r.title,
@@ -46,6 +55,7 @@ function serializeSession(r: {
     imageUrl: r.imageUrl,
     level: r.level,
     capacity: r.capacity,
+    registeredCount: r._count.registrations,
     topics: r.topics.map((t) => ({
       id: String(t.topic.id),
       name: t.topic.name,
@@ -53,10 +63,6 @@ function serializeSession(r: {
     })),
   };
 }
-
-const SESSION_INCLUDE = {
-  topics: { include: { topic: { select: { id: true, name: true, slug: true } } } },
-} as const;
 
 export async function getFormationVideos(): Promise<FormationVideo[]> {
   const rows = await prisma.formationVideo.findMany({
@@ -89,8 +95,9 @@ export async function getFormationSessionById(id: string): Promise<FormationSess
 
 export async function getFormationSessions(): Promise<FormationSession[]> {
   const rows = await prisma.formationSession.findMany({
+    where: { status: "OPEN" },
     orderBy: { date: "asc" },
     include: SESSION_INCLUDE,
   });
-  return rows.map(serializeSession);
+  return rows.map((r) => serializeSession(r, null));
 }

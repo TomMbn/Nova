@@ -1,75 +1,53 @@
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowUpRight } from "lucide-react";
 import type { FormationSession } from "@/queries/formations";
 
 function formatDate(date: Date): string {
-  return date.toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }
-
-const STATUS_LABEL: Record<string, string> = {
-  OPEN: "Inscriptions ouvertes",
-  DONE: "Terminée",
-  CANCELLED: "Annulée",
-};
 
 export function FormationSessionCard({ session }: { session: FormationSession }) {
   return (
-    <article className="border border-[#e8e8e8] rounded-[10px] p-[10px] flex flex-col gap-[10px]">
-      {/* Image */}
-      {session.imageUrl && (
-        <div className="relative w-full aspect-video rounded-[10px] overflow-hidden bg-[#f7f7f7]">
-          <Image src={session.imageUrl} alt={session.title} fill className="object-cover" />
+    <Link href={`/formations/sessions/${session.id}`}>
+      <article className="border border-[#e8e8e8] rounded-[10px] p-[10px] flex flex-col gap-[10px]">
+
+        {/* Header : titre + date */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex flex-col gap-[2px] min-w-0">
+            <p className="text-[12px] font-bold leading-tight truncate">{session.title}</p>
+            <p className="text-[12px] font-normal leading-tight text-foreground truncate">{session.location}</p>
+          </div>
+          <span className="text-[12px] font-bold shrink-0">{formatDate(session.date)}</span>
         </div>
-      )}
 
-      {/* Header : titre + date */}
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-[12px] font-bold leading-tight flex-1">{session.title}</p>
-        <span className="text-[12px] font-bold shrink-0">{formatDate(session.date)}</span>
-      </div>
-
-      {/* Lieu + niveau */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[12px] font-normal text-muted-foreground">{session.location}</span>
-        {session.level && (
-          <span className="px-[10px] py-1 h-6 rounded-[10px] bg-[#e8e8e8] text-[12px] font-bold leading-none flex items-center">
-            {session.level}
-          </span>
+        {/* Topics */}
+        {session.topics.length > 0 && (
+          <div className="flex gap-2 flex-wrap">
+            {session.topics.map((t) => (
+              <span
+                key={t.id}
+                className="px-[10px] py-1 h-6 rounded-[10px] bg-[#f7f7f7] text-[12px] font-bold leading-none flex items-center"
+              >
+                {t.name}
+              </span>
+            ))}
+          </div>
         )}
-      </div>
 
-      {/* Topics */}
-      {session.topics.length > 0 && (
-        <div className="flex gap-2 flex-wrap">
-          {session.topics.map((t) => (
-            <span
-              key={t.id}
-              className="px-[10px] py-1 h-6 rounded-[10px] bg-[#f7f7f7] text-[12px] font-bold leading-none flex items-center"
-            >
-              {t.name}
-            </span>
-          ))}
+        {/* Description */}
+        <p className="text-[12px] font-normal leading-snug line-clamp-2">{session.description}</p>
+
+        {/* Image */}
+        <div className="relative w-full h-[185px] rounded-[10px] overflow-hidden border border-[#e8e8e8] bg-[#f7f7f7]">
+          {session.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={session.imageUrl} alt={session.title} className="w-full h-full object-cover" />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-[12px]">
+              Aucune image
+            </div>
+          )}
         </div>
-      )}
-
-      {/* Footer : statut + voir plus */}
-      <div className="flex items-center justify-between pt-1">
-        <span className="text-[12px] font-normal text-muted-foreground">
-          {STATUS_LABEL[session.status] ?? session.status}
-        </span>
-        <Link
-          href={`/formations/sessions/${session.id}`}
-          className="flex items-center gap-1 text-[14px] font-bold"
-        >
-          Voir plus
-          <ArrowUpRight size={18} strokeWidth={2} />
-        </Link>
-      </div>
-    </article>
+      </article>
+    </Link>
   );
 }

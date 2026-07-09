@@ -30,17 +30,17 @@ export function SessionDetailTabs({ session }: { session: FormationSession }) {
       </div>
 
       {/* Contenu */}
-      <div className="px-[14px] flex flex-col gap-5 pt-4">
+      <div className="px-[14px] flex flex-col gap-3 pt-4 pb-22">
         {tab === "À propos" ? (
           <>
             {/* Description */}
-            <section className="flex flex-col gap-2">
+            <section className="border border-[#e8e8e8] rounded-[10px] p-[14px] flex flex-col gap-2">
               <h2 className="text-[14px] font-bold">À propos de la formation</h2>
               <p className="text-[13px] leading-relaxed">{session.description}</p>
             </section>
 
             {/* Compétences développées */}
-            <section className="flex flex-col gap-3">
+            <section className="border border-[#e8e8e8] rounded-[10px] p-[14px] flex flex-col gap-3">
               <h2 className="text-[14px] font-bold">Compétences développées</h2>
               {[
                 "Structurer un design system",
@@ -57,7 +57,7 @@ export function SessionDetailTabs({ session }: { session: FormationSession }) {
             </section>
 
             {/* Ce que vous allez obtenir */}
-            <section className="flex flex-col gap-3">
+            <section className="border border-[#e8e8e8] rounded-[10px] p-[14px] flex flex-col gap-3">
               <h2 className="text-[14px] font-bold">Ce que vous allez obtenir</h2>
               {[
                 { icon: FileText, label: "Support de formation (PDF)" },
@@ -73,7 +73,7 @@ export function SessionDetailTabs({ session }: { session: FormationSession }) {
             </section>
 
             {/* Financement */}
-            <section className="flex flex-col gap-2">
+            <section className="border border-[#e8e8e8] rounded-[10px] p-[14px] flex flex-col gap-2">
               <h2 className="text-[14px] font-bold">Financement</h2>
               <p className="text-[13px] font-bold">Formation prise en charge à 100%*</p>
               <p className="text-[13px] text-muted-foreground">
@@ -91,7 +91,7 @@ export function SessionDetailTabs({ session }: { session: FormationSession }) {
             </section>
 
             {/* Lieu */}
-            <section className="flex flex-col gap-2 pb-4">
+            <section className="border border-[#e8e8e8] rounded-[10px] p-[14px] flex flex-col gap-2">
               <h2 className="text-[14px] font-bold">Lieu de la formation</h2>
               <p className="text-[13px] font-bold">{session.location}</p>
               <div className="w-full h-[120px] rounded-[10px] bg-[#e8e8e8] flex items-center justify-center">

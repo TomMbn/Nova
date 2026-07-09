@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowLeft, Share, Bookmark, Calendar, MapPin, Users, BarChart2 } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Users, BarChart2 } from "lucide-react";
 import { getFormationSessionById } from "@/queries/formations";
-import { BottomNav } from "@/components/bottom-nav";
 import { SessionDetailTabs } from "@/components/formations/session-detail-tabs";
+import { SessionCTA } from "@/components/formations/session-cta";
 
 function formatDate(date: Date) {
   return date.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
@@ -27,7 +26,7 @@ export default async function FormationSessionPage({
 
   return (
     <>
-      <div className="flex flex-col min-h-full pb-28">
+      <div className="flex flex-col min-h-full">
 
         {/* Header */}
         <header className="flex items-center gap-2 px-[14px] py-[15px] sticky top-0 bg-background z-40">
@@ -38,12 +37,6 @@ export default async function FormationSessionPage({
             <ArrowLeft size={20} strokeWidth={1.8} />
           </Link>
           <p className="flex-1 text-center text-[14px] font-bold">Détails de la formation</p>
-          <button className="flex items-center justify-center size-[38px] rounded-[10px] hover:bg-muted transition-colors">
-            <Share size={18} strokeWidth={1.8} />
-          </button>
-          <button className="flex items-center justify-center size-[38px] rounded-[10px] hover:bg-muted transition-colors">
-            <Bookmark size={18} strokeWidth={1.8} />
-          </button>
         </header>
 
         <main className="flex-1 flex flex-col gap-4">
@@ -53,48 +46,45 @@ export default async function FormationSessionPage({
             {/* Image + infos côte à côte */}
             <div className="flex gap-3 items-start">
               {/* Image carrée gauche */}
-              <div className="flex flex-col items-start gap-2 shrink-0">
-                <div className="relative size-[80px] rounded-[10px] overflow-hidden bg-[#e8e8e8]">
+              <div className="relative flex flex-col items-start gap-2 shrink-0">
+                <div className="relative size-[90px] rounded-[10px] overflow-hidden bg-[#e8e8e8]">
                   {session.imageUrl ? (
-                    <Image src={session.imageUrl} alt={session.title} fill className="object-cover" />
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={session.imageUrl} alt={session.title} className="w-full h-full object-cover" />
                   ) : null}
                 </div>
                 {session.capacity && (
-                  <span className="px-2 py-1 rounded-[6px] bg-[#1e1e1e] text-[#e8e8e8] text-[10px] font-bold whitespace-nowrap">
-                    {session.capacity} places
+                  <span className="absolute bottom-2 left-1/2 -translate-x-1/2 px-2 py-1 rounded-[6px] bg-[#1e1e1e] text-[#e8e8e8] text-[8px] whitespace-nowrap">
+                    {session.capacity} places restantes
                   </span>
                 )}
               </div>
 
               {/* Contenu droite */}
               <div className="flex flex-col gap-1 flex-1 min-w-0">
-                <span className="inline-flex items-center self-start px-2 py-[2px] rounded-full bg-[#1e1e1e] text-[#e8e8e8] text-[10px] font-bold tracking-wide uppercase">
+                <span className="inline-flex items-center self-start px-2 py-[2px] rounded-[5px] text-[#1e1e1e] text-[8px] tracking-wide uppercase border-[1px] border-[#1e1e1e]">
                   Présentiel
                 </span>
                 <h1 className="text-[18px] font-bold leading-snug">{session.title}</h1>
-                <p className="text-[12px] text-muted-foreground leading-snug line-clamp-3">
-                  {session.description}
-                </p>
+                {/* Topics scrollables */}
+                {session.topics.length > 0 && (
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                    {session.topics.map((t) => (
+                      <span
+                        key={t.id}
+                        className="shrink-0 px-[10px] py-1 h-6 rounded-[10px] border-[1px] border-[#f7f7f7] text-[12px] font-bold leading-none flex items-center"
+                      >
+                        {t.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-
-            {/* Topics scrollables */}
-            {session.topics.length > 0 && (
-              <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                {session.topics.map((t) => (
-                  <span
-                    key={t.id}
-                    className="shrink-0 px-[10px] py-1 h-6 rounded-[10px] bg-[#f7f7f7] text-[12px] font-bold leading-none flex items-center"
-                  >
-                    {t.name}
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Info bar 4 colonnes */}
-          <div className="grid grid-cols-4 border-y border-[#e8e8e8] py-3">
+          <div className="grid grid-cols-4 border-y border-[#e8e8e8] p-3">
             <div className="flex flex-col items-center gap-1 text-center px-1">
               <Calendar size={18} strokeWidth={1.8} className="text-muted-foreground" />
               <span className="text-[10px] font-bold leading-tight">{formatDate(session.date)}</span>
@@ -106,7 +96,7 @@ export default async function FormationSessionPage({
             </div>
             <div className="flex flex-col items-center gap-1 text-center px-1 border-l border-[#e8e8e8]">
               <Users size={18} strokeWidth={1.8} className="text-muted-foreground" />
-              <span className="text-[10px] font-bold">{session.capacity ? `— / ${session.capacity}` : "—"}</span>
+              <span className="text-[10px] font-bold">{session.registeredCount} / {session.capacity ?? "∞"}</span>
               <span className="text-[10px] text-muted-foreground">participants</span>
             </div>
             <div className="flex flex-col items-center gap-1 text-center px-1 border-l border-[#e8e8e8]">
@@ -122,21 +112,15 @@ export default async function FormationSessionPage({
       </div>
 
       {/* CTA sticky */}
-      {isOpen && (
-        <div className="fixed bottom-0 left-0 right-0 px-[14px] py-3 bg-background border-t border-[#e8e8e8] z-50">
-          <a
-            href={session.cpfUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex flex-col items-center justify-center w-full h-[56px] rounded-[10px] bg-[#1e1e1e] text-[#e8e8e8]"
-          >
-            <span className="text-[14px] font-bold">Faire ma demande CPF</span>
-            <span className="text-[11px] opacity-70">Étape 1/3 · Vérifier mon éligibilité</span>
-          </a>
-        </div>
-      )}
-
-      <BottomNav />
+      <div className="fixed bottom-0 left-0 right-0 px-[14px] py-3 z-[9999]">
+        {isOpen ? (
+          <SessionCTA sessionId={session.id} cpfUrl={session.cpfUrl} />
+        ) : (
+          <div className="flex items-center justify-center w-full h-[56px] rounded-[10px] bg-[#e8e8e8] text-[#888888]">
+            <span className="text-[14px] font-bold">Session terminée</span>
+          </div>
+        )}
+      </div>
     </>
   );
 }
