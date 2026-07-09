@@ -21,6 +21,44 @@ const TOPICS = [
   { slug: "design", name: "Design" },
 ];
 
+// Bac +2 : formations en 2 ans → une classe B1 et une classe B2 chacune.
+const FORMATIONS_BAC2 = [
+  "Bachelor Digital Design",
+  "Bachelor Informatique",
+  "Bachelor Marketing Digital",
+  "BTS Services Informatiques aux Organisations (SIO)",
+];
+
+// Bac +3 : admission post-bac+2, une seule année → classe B3.
+const FORMATIONS_BAC3 = [
+  "Bachelor Chargé d'Affaires Web",
+  "Bachelor Chef de Projet Digital",
+  "Bachelor Création Numérique",
+  "Bachelor Cybersécurité et Administrateur Réseau",
+  "Bachelor Data Analyst et IA",
+  "Bachelor Développeur Web",
+  "Bachelor UX/UI Design",
+  "Bachelor Webmarketing & Social Media",
+];
+
+// Bac +5 : MBA en alternance, 2 ans → classe M1 et M2 chacune.
+const FORMATIONS_MBA = [
+  "MBA Big Data & Intelligence Artificielle (IA)",
+  "MBA Cybersécurité et Architecture Réseau",
+  "MBA Développeur Full Stack",
+  "MBA Direction Artistique Digitale",
+  "MBA Entrepreneuriat et Digital Business",
+  "MBA Expert Marketing Digital",
+  "MBA Lead UX/UI Designer",
+  "MBA Management de Projet Digital",
+];
+
+const CLASSES = [
+  ...FORMATIONS_BAC2.flatMap((name) => [`${name} - B1`, `${name} - B2`]),
+  ...FORMATIONS_BAC3.map((name) => `${name} - B3`),
+  ...FORMATIONS_MBA.flatMap((name) => [`${name} - M1`, `${name} - M2`]),
+];
+
 async function main() {
   // --- Référentiels ---
   await prisma.role.deleteMany({ where: { name: "Futur élève" } });
@@ -37,6 +75,9 @@ async function main() {
       create: topic,
     });
   }
+  for (const name of CLASSES) {
+    await prisma.class.upsert({ where: { name }, update: {}, create: { name } });
+  }
 
   // --- Utilisateurs de démo ---
   const passwordHash = await bcrypt.hash("password123", 10);
@@ -44,6 +85,7 @@ async function main() {
   const roleAlumni = await prisma.role.findFirstOrThrow({ where: { name: "Alumni" } });
   const roleEleve = await prisma.role.findFirstOrThrow({ where: { name: "Élève actuel" } });
   const roleIntervenant = await prisma.role.findFirstOrThrow({ where: { name: "Intervenant" } });
+  const classDataIA = await prisma.class.findFirstOrThrow({ where: { name: "Bachelor Data Analyst et IA - B3" } });
 
   const julie = await prisma.user.upsert({
     where: { email: "julie@demo.fr" },
@@ -59,13 +101,14 @@ async function main() {
 
   const thomas = await prisma.user.upsert({
     where: { email: "thomas@demo.fr" },
-    update: {},
+    update: { currentClassId: classDataIA.id },
     create: {
       email: "thomas@demo.fr",
       passwordHash,
       name: "Thomas Dupont",
       bio: "Étudiant en 3e année, passionné de data.",
       roleId: roleEleve.id,
+      currentClassId: classDataIA.id,
     },
   });
 
