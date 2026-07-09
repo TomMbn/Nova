@@ -1,6 +1,7 @@
 import { searchUsers } from "@/queries/users";
 import { getRoles, getSkills, getCompanies } from "@/queries/referentials";
 import { BottomNav } from "@/components/bottom-nav";
+import { TopBar } from "@/components/feed/top-bar";
 import { SearchFiltersForm } from "@/components/search/search-filters-form";
 import { MemberResults, type Member } from "@/components/search/member-results";
 
@@ -39,6 +40,7 @@ export default async function RecherchePage({
   return (
     <>
       <div className="flex flex-col min-h-full pb-20">
+        <TopBar />
         <SearchFiltersForm
           q={q}
           roleId={roleId}

@@ -73,12 +73,6 @@ export function PostCard({ post }: { post: FeedPost }) {
       {post.content && (
         <div className="flex flex-col gap-1">
           <p className="text-[14px] font-bold leading-snug">{post.content}</p>
-          <Link
-            href={`/posts/${post.id}`}
-            className="text-[12px] font-normal text-foreground w-fit hover:underline"
-          >
-            Détails
-          </Link>
         </div>
       )}
 

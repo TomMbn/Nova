@@ -8,7 +8,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import { BottomNav } from "@/components/bottom-nav";
 
 const SKILLS_PREVIEW_COUNT = 7;
 
@@ -159,7 +158,6 @@ export default async function PublicProfilePage({
           </Card>
         )}
       </main>
-      <BottomNav />
     </div>
   );
 }
