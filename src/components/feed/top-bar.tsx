@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Search, Bell, User } from "lucide-react";
 
 export function TopBar() {
@@ -12,8 +13,8 @@ export function TopBar() {
         <Search size={22} strokeWidth={1.8} />
       </Link>
 
-      <div className="flex items-center justify-center h-[46px] rounded-[10px] bg-[#e8e8e8] flex-1">
-        <span className="text-xs font-bold tracking-wide">Nova</span>
+      <div className="flex items-center justify-center h-[46px] rounded-[10px] flex-1">
+        <Image src="/logo-nova/nova-logo.png" alt="Nova" width={116} height={28} priority />
       </div>
 
       <div className="flex items-center gap-1">
