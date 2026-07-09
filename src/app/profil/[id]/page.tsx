@@ -85,7 +85,7 @@ export default async function PublicProfilePage({
             )}
 
             <Link
-              href="/messages"
+              href={`/messages/${id}`}
               className={buttonVariants({ className: "h-10 rounded-xl" })}
             >
               <MessageCircle className="size-4" />

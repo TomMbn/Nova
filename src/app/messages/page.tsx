@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { Search } from "lucide-react";
 import { getConversations } from "@/queries/messages";
 import { TopBar } from "@/components/feed/top-bar";
 import { BottomNav } from "@/components/bottom-nav";
@@ -18,7 +20,15 @@ export default async function MessagesPage() {
     <div className="flex flex-col min-h-full pb-20">
       <TopBar />
       <main className="flex-1 flex flex-col px-4 pt-1">
-        <h1 className="pb-3 text-lg font-semibold">Messages</h1>
+        <div className="flex items-center justify-between pb-3">
+          <h1 className="text-lg font-semibold">Messages</h1>
+          <Link
+            href="/recherche"
+            className="flex items-center justify-center size-[38px] rounded-[10px] hover:bg-muted transition-colors"
+          >
+            <Search size={18} strokeWidth={1.8} />
+          </Link>
+        </div>
 
         {conversations.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
@@ -35,7 +45,8 @@ export default async function MessagesPage() {
                 .toUpperCase();
 
               return (
-                <li key={partner.id} className="flex items-center gap-3 py-3">
+                <li key={partner.id}>
+                <Link href={`/messages/${partner.id}`} className="flex items-center gap-3 py-3">
                   <Avatar size="lg">
                     <AvatarImage
                       src={partner.avatarUrl ?? undefined}
@@ -55,6 +66,7 @@ export default async function MessagesPage() {
                     </span>
                     {unreadCount > 0 && <Badge>{unreadCount}</Badge>}
                   </div>
+                </Link>
                 </li>
               );
             })}
