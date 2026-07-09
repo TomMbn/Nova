@@ -30,7 +30,10 @@ export function PostCard({ post }: { post: FeedPost }) {
 
       {/* Header : avatar + nom/rôle + timestamp */}
       <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-3 min-w-0">
+        <Link
+          href={`/profil/${post.author.id}`}
+          className="flex items-center gap-3 min-w-0 hover:opacity-80 transition-opacity"
+        >
           <div className="size-[38px] rounded-[10px] bg-[#e8e8e8] flex items-center justify-center shrink-0 overflow-hidden">
             {post.author.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -45,7 +48,7 @@ export function PostCard({ post }: { post: FeedPost }) {
               {post.author.role}
             </p>
           </div>
-        </div>
+        </Link>
         <div className="flex items-center gap-1 shrink-0 mt-0.5">
           <span className="text-[12px] font-bold">{relativeTime(post.createdAt)}</span>
           {post.isAuthor && (
