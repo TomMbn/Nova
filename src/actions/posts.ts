@@ -4,6 +4,17 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
 import { toBigInt, toBigIntList } from "@/lib/bigint";
 import { ok, fail, type ActionResult } from "@/lib/action";
+import { getFeed, type FeedPost } from "@/queries/posts";
+
+const FEED_LIMIT = 3;
+
+/** Charge une page de posts (utilisé pour l'infinite scroll côté client). */
+export async function fetchFeedPage(cursor: string | null): Promise<{
+  posts: FeedPost[];
+  nextCursor: string | null;
+}> {
+  return getFeed({ cursor, limit: FEED_LIMIT });
+}
 
 // Le MCD contraint media.type par un CHECK IN ('IMAGE', 'VIDEO') — non
 // représentable en Prisma, on valide donc ici (cf. CLAUDE.md).

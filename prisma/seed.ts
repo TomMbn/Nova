@@ -5,7 +5,6 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 const ROLES = [
-  "Futur élève",
   "Élève actuel",
   "Alumni",
   "Intervenant",
@@ -24,6 +23,7 @@ const TOPICS = [
 
 async function main() {
   // --- Référentiels ---
+  await prisma.role.deleteMany({ where: { name: "Futur élève" } });
   for (const name of ROLES) {
     await prisma.role.upsert({ where: { name }, update: {}, create: { name } });
   }
