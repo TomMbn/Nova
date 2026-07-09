@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, MessageCircle } from "lucide-react";
+import { ArrowLeft, GraduationCap, MessageCircle } from "lucide-react";
 
 import { getUserById } from "@/queries/users";
 import { getSessionUserId } from "@/lib/auth";
@@ -8,6 +8,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { BottomNav } from "@/components/bottom-nav";
+
+const SKILLS_PREVIEW_COUNT = 7;
 
 function formatPeriod(start: Date | null, end: Date | null, isCurrent: boolean) {
   const fmt = (d: Date) =>
@@ -40,6 +43,9 @@ export default async function PublicProfilePage({
     .join("")
     .toUpperCase();
 
+  const visibleSkills = profile.skills.slice(0, SKILLS_PREVIEW_COUNT);
+  const hiddenSkillsCount = profile.skills.length - visibleSkills.length;
+
   return (
     <div className="flex flex-col min-h-full pb-20">
       <header className="flex items-center gap-3 px-[14px] py-[15px] bg-background sticky top-0 z-40">
@@ -50,25 +56,31 @@ export default async function PublicProfilePage({
         >
           <ArrowLeft size={20} strokeWidth={1.8} />
         </Link>
-        <h1 className="text-sm font-bold">Profil</h1>
+        <h1 className="flex-1 text-center text-sm font-bold pr-[40px]">Profil</h1>
       </header>
 
       <main className="flex-1 flex flex-col gap-4 px-4 pt-1">
         <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-6 text-center">
-            <Avatar size="lg" className="size-20">
-              <AvatarImage src={profile.avatarUrl ?? undefined} alt={profile.name} />
-              <AvatarFallback className="text-xl">{initials}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col gap-1">
-              <h2 className="text-lg font-semibold">{profile.name}</h2>
+          <CardContent className="flex flex-col gap-4">
+            <div className="flex items-start gap-3">
+              <Avatar size="lg" className="size-16">
+                <AvatarImage src={profile.avatarUrl ?? undefined} alt={profile.name} />
+                <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col gap-1.5 pt-0.5">
+                <h2 className="text-lg font-semibold leading-tight">{profile.name}</h2>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="secondary">{profile.role.name}</Badge>
+                </div>
+                {profile.currentClass && (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <GraduationCap className="size-3.5 shrink-0" />
+                    <span>{profile.currentClass.name}</span>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <Badge variant="secondary">{profile.role.name}</Badge>
-              {profile.currentClass && (
-                <Badge variant="secondary">{profile.currentClass.name}</Badge>
-              )}
-            </div>
+
             {profile.bio && (
               <p className="text-sm text-muted-foreground">{profile.bio}</p>
             )}
@@ -88,11 +100,14 @@ export default async function PublicProfilePage({
             <CardContent className="flex flex-col gap-2">
               <h3 className="text-sm font-medium">Compétences</h3>
               <div className="flex flex-wrap gap-2">
-                {profile.skills.map(({ skill }) => (
+                {visibleSkills.map(({ skill }) => (
                   <Badge key={String(skill.id)} variant="outline">
                     {skill.name}
                   </Badge>
                 ))}
+                {hiddenSkillsCount > 0 && (
+                  <Badge variant="outline">+{hiddenSkillsCount}</Badge>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -102,39 +117,49 @@ export default async function PublicProfilePage({
           <Card>
             <CardContent className="flex flex-col gap-3">
               <h3 className="text-sm font-medium">Parcours</h3>
-              <div className="flex flex-col gap-3">
-                {profile.experiences.map((experience) => (
-                  <div key={String(experience.id)} className="flex flex-col gap-0.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium">
-                        {experience.title
-                          ? `${experience.title} — ${experience.company.name}`
-                          : experience.company.name}
-                      </span>
-                      {experience.isCurrent && (
-                        <Badge variant="secondary">Actuel</Badge>
-                      )}
-                    </div>
-                    {formatPeriod(
-                      experience.startDate,
-                      experience.endDate,
-                      experience.isCurrent
-                    ) && (
-                      <span className="text-xs text-muted-foreground">
-                        {formatPeriod(
-                          experience.startDate,
-                          experience.endDate,
-                          experience.isCurrent
+              <div className="flex flex-col">
+                {profile.experiences.map((experience, index) => {
+                  const isLast = index === profile.experiences.length - 1;
+                  const period = formatPeriod(
+                    experience.startDate,
+                    experience.endDate,
+                    experience.isCurrent
+                  );
+
+                  return (
+                    <div key={String(experience.id)} className="flex gap-3">
+                      <div className="flex flex-col items-center">
+                        <span className="mt-1.5 size-2 rounded-full bg-foreground shrink-0" />
+                        {!isLast && <span className="w-px flex-1 bg-border" />}
+                      </div>
+                      <div className="flex-1 flex flex-col gap-0.5 pb-4">
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="text-sm font-medium">
+                            {experience.title
+                              ? `${experience.title} — ${experience.company.name}`
+                              : experience.company.name}
+                          </span>
+                          {period && (
+                            <span className="text-xs text-muted-foreground shrink-0">
+                              {period}
+                            </span>
+                          )}
+                        </div>
+                        {experience.isCurrent && (
+                          <Badge variant="secondary" className="w-fit">
+                            Actuel
+                          </Badge>
                         )}
-                      </span>
-                    )}
-                  </div>
-                ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
         )}
       </main>
+      <BottomNav />
     </div>
   );
 }
