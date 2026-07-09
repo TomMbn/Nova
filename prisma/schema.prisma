@@ -14,8 +14,13 @@
 //    elles vivent dans la migration SQL mais pas ici
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider      = "prisma-client"
+  output        = "../src/generated/prisma"
+  // "native" pour le dev local, "rhel-openssl-3.0.x" pour les fonctions
+  // serverless Vercel (Amazon Linux 2023) — sans ça, le Query Engine binaire
+  // n'est généré que pour la machine locale et le déploiement échoue au
+  // runtime (PrismaClientInitializationError).
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
