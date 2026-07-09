@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/auth";
+import { getSessionUserId } from "@/lib/auth";
 import { toBigInt } from "@/lib/bigint";
 import { ok, fail, type ActionResult } from "@/lib/action";
 
@@ -10,17 +10,18 @@ import { ok, fail, type ActionResult } from "@/lib/action";
 export async function registerForSession(
   sessionId: string | number | bigint
 ): Promise<ActionResult<{ id: string; cpfUrl: string }>> {
-  const user = await requireUser();
+  const userId = await getSessionUserId();
+  if (!userId) return fail("Non authentifié.");
 
   const sid = toBigInt(sessionId);
   if (sid === null) return fail("Identifiant de session invalide.");
 
-  // Vérification du rôle Alumni en base (requireUser ne charge pas le rôle).
-  const userWithRole = await prisma.user.findUnique({
-    where: { id: user.id },
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
     include: { role: true },
   });
-  if (userWithRole?.role.name !== "Alumni")
+  if (!user) return fail("Utilisateur introuvable.");
+  if (user.role.name !== "Alumni")
     return fail("Les formations en présentiel sont réservées aux alumni.");
 
   const session = await prisma.formationSession.findUnique({ where: { id: sid } });
@@ -28,13 +29,13 @@ export async function registerForSession(
   if (session.status !== "OPEN") return fail("Cette session n'accepte plus d'inscriptions.");
 
   const existing = await prisma.formationRegistration.findUnique({
-    where: { userId_sessionId: { userId: user.id, sessionId: sid } },
+    where: { userId_sessionId: { userId, sessionId: sid } },
   });
   if (existing) return fail("Vous êtes déjà inscrit à cette session.");
 
   try {
     const registration = await prisma.formationRegistration.create({
-      data: { userId: user.id, sessionId: sid, status: "CONFIRMED" },
+      data: { userId, sessionId: sid, status: "CONFIRMED" },
       select: { id: true },
     });
     return ok({ id: String(registration.id), cpfUrl: session.cpfUrl });
@@ -47,7 +48,8 @@ export async function registerForSession(
 export async function cancelRegistration(
   registrationId: string | number | bigint
 ): Promise<ActionResult<{ cpfUrl: string }>> {
-  const user = await requireUser();
+  const userId = await getSessionUserId();
+  if (!userId) return fail("Non authentifié.");
 
   const rid = toBigInt(registrationId);
   if (rid === null) return fail("Identifiant invalide.");
@@ -57,7 +59,7 @@ export async function cancelRegistration(
     include: { session: true },
   });
   if (!registration) return fail("Inscription introuvable.");
-  if (registration.userId !== user.id) return fail("Non autorisé.");
+  if (registration.userId !== userId) return fail("Non autorisé.");
   if (registration.status === "CANCELLED") return fail("Inscription déjà annulée.");
 
   try {

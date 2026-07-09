@@ -6,8 +6,8 @@ import { toBigInt } from "@/lib/bigint";
 import { ok, fail, type ActionResult } from "@/lib/action";
 
 // Laisse un avis sur une session présentielle.
-// L'utilisateur doit avoir participé en tant que PARTICIPANT avec statut
-// CONFIRMED, et ne pas avoir déjà laissé d'avis sur cette session.
+// L'utilisateur doit avoir une inscription avec statut CONFIRMED et ne pas
+// avoir déjà laissé d'avis sur cette session.
 export async function leaveReview(
   sessionId: string | number | bigint,
   rating: number,
