@@ -77,6 +77,21 @@ export async function getConversations() {
 }
 
 /**
+ * Nombre total de messages privés non lus reçus par l'utilisateur connecté,
+ * tous interlocuteurs confondus (pour le badge de notification global).
+ *
+ * Retourne 0 si personne n'est authentifié.
+ */
+export async function getUnreadMessagesCount() {
+  const userId = await getSessionUserId();
+  if (!userId) return 0;
+
+  return prisma.message.count({
+    where: { receiverId: userId, readAt: null },
+  });
+}
+
+/**
  * Historique des messages échangés entre l'utilisateur connecté et `userId`,
  * paginé par curseur (id du dernier message chargé), du plus récent au plus
  * ancien.
