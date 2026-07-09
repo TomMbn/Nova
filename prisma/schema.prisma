@@ -85,8 +85,10 @@ model Topic {
   name String @unique(map: "topic_name_unique") @db.VarChar(100)
   slug String @unique(map: "topic_slug_unique") @db.VarChar(100)
 
-  posts      PostTopic[]
-  followedBy FollowedTopic[]
+  posts           PostTopic[]
+  followedBy      FollowedTopic[]
+  formationVideos FormationVideoTopic[]
+  formationSessions FormationSessionTopic[]
 
   @@map("topic")
 }
@@ -294,6 +296,8 @@ model FormationVideo {
   description String
   videoUrl    String @map("video_url") @db.VarChar(500)
 
+  topics FormationVideoTopic[]
+
   @@map("formation_video")
 }
 
@@ -309,8 +313,29 @@ model FormationSession {
 
   registrations FormationRegistration[]
   reviews       Review[]
+  topics        FormationSessionTopic[]
 
   @@map("formation_session")
+}
+
+model FormationVideoTopic {
+  video   FormationVideo @relation(fields: [videoId], references: [id], map: "formation_video_topic_video_id_foreign", onDelete: NoAction, onUpdate: NoAction)
+  videoId BigInt         @map("video_id")
+  topic   Topic          @relation(fields: [topicId], references: [id], map: "formation_video_topic_topic_id_foreign", onDelete: NoAction, onUpdate: NoAction)
+  topicId BigInt         @map("topic_id")
+
+  @@id([videoId, topicId])
+  @@map("formation_video_topic")
+}
+
+model FormationSessionTopic {
+  session   FormationSession @relation(fields: [sessionId], references: [id], map: "formation_session_topic_session_id_foreign", onDelete: NoAction, onUpdate: NoAction)
+  sessionId BigInt           @map("session_id")
+  topic     Topic            @relation(fields: [topicId], references: [id], map: "formation_session_topic_topic_id_foreign", onDelete: NoAction, onUpdate: NoAction)
+  topicId   BigInt           @map("topic_id")
+
+  @@id([sessionId, topicId])
+  @@map("formation_session_topic")
 }
 
 // role : PARTICIPANT | ANIMATEUR | JURY

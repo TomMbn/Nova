@@ -9,6 +9,7 @@ export function getSessions() {
   return prisma.formationSession.findMany({
     where: { status: "OPEN" },
     include: {
+      topics: { include: { topic: true } },
       _count: { select: { registrations: { where: { status: "CONFIRMED" } } } },
     },
     orderBy: { date: "asc" },
@@ -22,6 +23,7 @@ export async function getSessionById(id: string | number | bigint) {
   return prisma.formationSession.findUnique({
     where: { id: sid },
     include: {
+      topics: { include: { topic: true } },
       _count: { select: { registrations: { where: { status: "CONFIRMED" } } } },
     },
   });

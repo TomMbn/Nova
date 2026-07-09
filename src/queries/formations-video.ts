@@ -6,6 +6,7 @@ import { toBigInt } from "@/lib/bigint";
 
 export function getVideos() {
   return prisma.formationVideo.findMany({
+    include: { topics: { include: { topic: true } } },
     orderBy: { title: "asc" },
   });
 }
@@ -14,5 +15,8 @@ export async function getVideoById(id: string | number | bigint) {
   const vid = toBigInt(id);
   if (vid === null) return null;
 
-  return prisma.formationVideo.findUnique({ where: { id: vid } });
+  return prisma.formationVideo.findUnique({
+    where: { id: vid },
+    include: { topics: { include: { topic: true } } },
+  });
 }

@@ -191,6 +191,22 @@ CREATE TABLE "vote" (
 );
 
 -- CreateTable
+CREATE TABLE "formation_video_topic" (
+    "video_id" BIGINT NOT NULL,
+    "topic_id" BIGINT NOT NULL,
+
+    CONSTRAINT "formation_video_topic_pkey" PRIMARY KEY ("video_id","topic_id")
+);
+
+-- CreateTable
+CREATE TABLE "formation_session_topic" (
+    "session_id" BIGINT NOT NULL,
+    "topic_id" BIGINT NOT NULL,
+
+    CONSTRAINT "formation_session_topic_pkey" PRIMARY KEY ("session_id","topic_id")
+);
+
+-- CreateTable
 CREATE TABLE "formation_video" (
     "id" BIGSERIAL NOT NULL,
     "title" VARCHAR(255) NOT NULL,
@@ -373,6 +389,18 @@ ALTER TABLE "vote" ADD CONSTRAINT "vote_option_id_foreign" FOREIGN KEY ("option_
 
 -- AddForeignKey
 ALTER TABLE "vote" ADD CONSTRAINT "vote_poll_id_foreign" FOREIGN KEY ("poll_id") REFERENCES "poll"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "formation_video_topic" ADD CONSTRAINT "formation_video_topic_video_id_foreign" FOREIGN KEY ("video_id") REFERENCES "formation_video"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "formation_video_topic" ADD CONSTRAINT "formation_video_topic_topic_id_foreign" FOREIGN KEY ("topic_id") REFERENCES "topic"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "formation_session_topic" ADD CONSTRAINT "formation_session_topic_session_id_foreign" FOREIGN KEY ("session_id") REFERENCES "formation_session"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "formation_session_topic" ADD CONSTRAINT "formation_session_topic_topic_id_foreign" FOREIGN KEY ("topic_id") REFERENCES "topic"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "formation_registration" ADD CONSTRAINT "formation_registration_user_id_foreign" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
