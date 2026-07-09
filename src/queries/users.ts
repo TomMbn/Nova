@@ -25,6 +25,10 @@ export async function getCurrentUserProfile() {
       skills: { include: { skill: true } },
       followedTopics: { include: { topic: true } },
       followedCategories: { include: { category: true } },
+      experiences: {
+        include: { company: true },
+        orderBy: { startDate: "desc" },
+      },
     },
   });
 }
@@ -57,7 +61,8 @@ export async function getUserById(id: string | number | bigint) {
 }
 
 /**
- * Recherche de membres de l'annuaire par nom, compétence, rôle et/ou classe.
+ * Recherche de membres de l'annuaire par nom, compétence, rôle, classe et/ou
+ * entreprise (via une expérience passée dans cette entreprise).
  * Tous les filtres sont optionnels et combinés en ET.
  * Les ids des filtres invalides sont ignorés (filtre désactivé).
  * Les ids retournés sont des BigInt — utiliser serializeBigInt() avant de
@@ -68,15 +73,18 @@ export async function searchUsers({
   skillId,
   roleId,
   classId,
+  companyId,
 }: {
   name?: string;
   skillId?: string | number | bigint;
   roleId?: string | number | bigint;
   classId?: string | number | bigint;
+  companyId?: string | number | bigint;
 }) {
   const parsedSkillId = skillId !== undefined ? toBigInt(skillId) : null;
   const parsedRoleId = roleId !== undefined ? toBigInt(roleId) : null;
   const parsedClassId = classId !== undefined ? toBigInt(classId) : null;
+  const parsedCompanyId = companyId !== undefined ? toBigInt(companyId) : null;
 
   return prisma.user.findMany({
     where: {
@@ -86,6 +94,9 @@ export async function searchUsers({
       }),
       ...(parsedRoleId !== null && { roleId: parsedRoleId }),
       ...(parsedClassId !== null && { currentClassId: parsedClassId }),
+      ...(parsedCompanyId !== null && {
+        experiences: { some: { companyId: parsedCompanyId } },
+      }),
     },
     omit: { passwordHash: true },
     include: {

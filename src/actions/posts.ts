@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth";
 import { toBigInt, toBigIntList } from "@/lib/bigint";
 import { ok, fail, type ActionResult } from "@/lib/action";
 import { getFeed, type FeedPost } from "@/queries/posts";
+import { saveUploadedFile } from "@/lib/media-storage";
 
 const FEED_LIMIT = 3;
 
@@ -25,15 +26,15 @@ const MEDIA_TYPES = ["IMAGE", "VIDEO"];
  * son éventuel sondage, en une seule transaction.
  *
  * Champs FormData :
- *  - content        (optionnel) texte du post
- *  - categoryId     (requis)    catégorie unique du post
- *  - eventDate      (optionnel) date d'événement (ISO)
- *  - location       (optionnel) lieu
- *  - topicIds       (0..n)      thématiques — champs répétés `topicIds`
- *  - mediaUrl[]     (0..n)      urls des médias — champs répétés `mediaUrl`
- *  - mediaType[]    (0..n)      types alignés par index sur `mediaUrl`
- *  - pollQuestion   (optionnel) question du sondage
- *  - pollOption[]   (0..n)      options — champs répétés `pollOption` (>= 2)
+ *  - content         (optionnel) texte du post
+ *  - categoryId      (requis)    catégorie unique du post
+ *  - eventDate       (optionnel) date d'événement (ISO)
+ *  - location        (optionnel) lieu
+ *  - topicIds        (0..n)      thématiques — champs répétés `topicIds`
+ *  - mediaFile[]     (0..n)      fichiers médias — champs répétés `mediaFile`
+ *  - mediaFileType[] (0..n)      types alignés par index sur `mediaFile`
+ *  - pollQuestion    (optionnel) question du sondage
+ *  - pollOption[]    (0..n)      options — champs répétés `pollOption` (>= 2)
  *
  * Un post doit contenir au moins un texte, un média ou un sondage.
  */
@@ -60,19 +61,22 @@ export async function createPost(
     formData.getAll("topicIds").map((v) => String(v))
   );
 
-  // Médias : tableaux parallèles mediaUrl[] / mediaType[], position = index.
-  const mediaUrls = formData.getAll("mediaUrl").map((v) => String(v).trim());
-  const mediaTypes = formData
-    .getAll("mediaType")
+  // Médias : tableaux parallèles mediaFile[] / mediaFileType[], position =
+  // index. Les fichiers sont écrits sur disque (hors transaction — l'écriture
+  // fichier n'est pas rollback-able) avant de créer le post.
+  const mediaFiles = formData.getAll("mediaFile").filter((v): v is File => v instanceof File);
+  const mediaFileTypes = formData
+    .getAll("mediaFileType")
     .map((v) => String(v).trim().toUpperCase());
   const media: { url: string; type: string; position: number }[] = [];
-  for (let i = 0; i < mediaUrls.length; i++) {
-    const url = mediaUrls[i];
-    if (!url) continue;
-    const type = mediaTypes[i] ?? "";
+  for (let i = 0; i < mediaFiles.length; i++) {
+    const file = mediaFiles[i];
+    const type = mediaFileTypes[i] ?? "";
     if (!MEDIA_TYPES.includes(type))
       return fail(`Type de média invalide : ${type || "manquant"}.`);
-    media.push({ url, type, position: media.length });
+    const saved = await saveUploadedFile(file, type as "IMAGE" | "VIDEO");
+    if ("error" in saved) return fail(saved.error);
+    media.push({ url: saved.url, type, position: media.length });
   }
 
   // Sondage : présent dès qu'une question ou une option est fournie.

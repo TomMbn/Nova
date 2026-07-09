@@ -1,8 +1,9 @@
 import Image from "next/image";
 import { ImageIcon } from "lucide-react";
+import { PollVote, type PollWithResults } from "./poll-vote";
 
 type Media = { id: string; type: string; url: string; position: number };
-type Poll = { id: string; question: string; options: { id: string; label: string }[] };
+type Poll = PollWithResults;
 
 export function PostCardMedia({
   media,
@@ -15,9 +16,17 @@ export function PostCardMedia({
   const firstVideo = !firstImage ? media.find((m) => m.type === "VIDEO") : null;
 
   if (firstImage) {
+    // Les aperçus locaux (composition d'un post) utilisent un blob: URL —
+    // next/image ne sait pas l'optimiser, on retombe sur <img> dans ce cas.
+    const isBlobPreview = firstImage.url.startsWith("blob:");
     return (
       <div className="relative w-full aspect-[16/9] rounded-[10px] overflow-hidden border border-border bg-muted">
-        <Image src={firstImage.url} alt="" fill className="object-cover" />
+        {isBlobPreview ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={firstImage.url} alt="" className="absolute inset-0 size-full object-cover" />
+        ) : (
+          <Image src={firstImage.url} alt="" fill className="object-cover" />
+        )}
       </div>
     );
   }
@@ -35,21 +44,7 @@ export function PostCardMedia({
   }
 
   if (poll) {
-    return (
-      <div className="rounded-[10px] border border-border p-3 flex flex-col gap-2">
-        <p className="text-sm font-bold">{poll.question}</p>
-        <div className="flex flex-col gap-1.5">
-          {poll.options.map((opt) => (
-            <div
-              key={opt.id}
-              className="w-full rounded-[6px] bg-muted px-3 py-2 text-xs font-medium"
-            >
-              {opt.label}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+    return <PollVote poll={poll} />;
   }
 
   return null;

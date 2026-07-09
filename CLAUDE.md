@@ -45,7 +45,7 @@ Points de vigilance :
   de lien personne↔thématique en base ; la recherche de membres par domaine
   passe uniquement par les compétences.
 - **Classe/promo** (`Class`) qualifie une personne, 0 ou 1, seulement
-  pertinente pour un `role` "Élève actuel".
+  pertinente pour un `role` "Élève".
 
 ## Commands
 

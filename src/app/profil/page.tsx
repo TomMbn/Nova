@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { LogOut } from "lucide-react";
+import Link from "next/link";
+import { LogOut, Pencil, Bookmark } from "lucide-react";
 
 import { getCurrentUserProfile } from "@/queries/users";
 import { BottomNav } from "@/components/bottom-nav";
@@ -7,7 +8,7 @@ import { TopBar } from "@/components/feed/top-bar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 export default async function ProfilPage() {
   const profile = await getCurrentUserProfile();
@@ -43,8 +44,45 @@ export default async function ProfilPage() {
             {profile.bio && (
               <p className="text-sm text-muted-foreground">{profile.bio}</p>
             )}
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Link
+                href="/profil/modifier"
+                className={buttonVariants({
+                  variant: "outline",
+                  className: "h-9 rounded-xl",
+                })}
+              >
+                <Pencil className="size-4" />
+                Modifier mon profil
+              </Link>
+              <Link
+                href="/profil/enregistrements"
+                className={buttonVariants({
+                  variant: "outline",
+                  className: "h-9 rounded-xl",
+                })}
+              >
+                <Bookmark className="size-4" />
+                Posts enregistrés
+              </Link>
+            </div>
           </CardContent>
         </Card>
+
+        {profile.followedTopics.length > 0 && (
+          <Card>
+            <CardContent className="flex flex-col gap-2">
+              <h2 className="text-sm font-medium">Spécialités</h2>
+              <div className="flex flex-wrap gap-2">
+                {profile.followedTopics.map(({ topic }) => (
+                  <Badge key={String(topic.id)} variant="secondary">
+                    {topic.name}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {profile.skills.length > 0 && (
           <Card>
@@ -55,6 +93,31 @@ export default async function ProfilPage() {
                   <Badge key={String(skill.id)} variant="outline">
                     {skill.name}
                   </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {profile.experiences.length > 0 && (
+          <Card>
+            <CardContent className="flex flex-col gap-2">
+              <h2 className="text-sm font-medium">Expérience</h2>
+              <div className="flex flex-col gap-1">
+                {profile.experiences.map((experience) => (
+                  <div
+                    key={String(experience.id)}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <span>
+                      {experience.title
+                        ? `${experience.title} — ${experience.company.name}`
+                        : experience.company.name}
+                    </span>
+                    {experience.isCurrent && (
+                      <Badge variant="secondary">Actuel</Badge>
+                    )}
+                  </div>
                 ))}
               </div>
             </CardContent>

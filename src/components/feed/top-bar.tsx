@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Search, Bell } from "lucide-react";
+import { Search, Bell, User } from "lucide-react";
 
 export function TopBar() {
   return (
@@ -16,13 +16,23 @@ export function TopBar() {
         <span className="text-xs font-bold tracking-wide">Nova</span>
       </div>
 
-      <Link
-        href="/notifications"
-        className="flex items-center justify-center size-[46px] rounded-[10px] hover:bg-muted transition-colors"
-        aria-label="Notifications"
-      >
-        <Bell size={22} strokeWidth={1.8} />
-      </Link>
+      <div className="flex items-center gap-1">
+        <Link
+          href="/notifications"
+          className="flex items-center justify-center size-[46px] rounded-[10px] hover:bg-muted transition-colors"
+          aria-label="Notifications"
+        >
+          <Bell size={22} strokeWidth={1.8} />
+        </Link>
+
+        <Link
+          href="/profil"
+          className="flex items-center justify-center size-[46px] rounded-[10px] hover:bg-muted transition-colors"
+          aria-label="Profil"
+        >
+          <User size={22} strokeWidth={1.8} />
+        </Link>
+      </div>
     </header>
   );
 }

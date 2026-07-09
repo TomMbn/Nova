@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "École Communauté",
-    short_name: "École Communauté",
+    name: "Nova",
+    short_name: "Nova",
     description:
       "Réseau social communautaire de l'école — futurs, actuels et anciens élèves, intervenants, équipe pédagogique.",
     start_url: "/",

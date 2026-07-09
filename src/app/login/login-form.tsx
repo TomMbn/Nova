@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,24 +20,6 @@ export function LoginForm() {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="name">Nom complet</Label>
-        <div className="relative">
-          <User className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            id="name"
-            name="name"
-            type="text"
-            placeholder="Prénom Nom"
-            autoComplete="name"
-            className="h-11 rounded-xl pl-9"
-          />
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Requis uniquement si vous n&apos;avez pas encore de compte.
-        </p>
-      </div>
-
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="email">Adresse e-mail</Label>
         <div className="relative">
@@ -109,8 +91,8 @@ export function LoginForm() {
       </Button>
 
       <p className="text-center text-xs text-muted-foreground">
-        Pas encore de compte ? Il sera créé automatiquement avec ces
-        informations lors de votre première connexion.
+        Pas encore de compte ? Vous serez guidé pour en créer un avec cette
+        adresse e-mail et ce mot de passe.
       </p>
     </form>
   );
