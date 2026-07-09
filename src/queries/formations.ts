@@ -99,5 +99,5 @@ export async function getFormationSessions(): Promise<FormationSession[]> {
     orderBy: { date: "asc" },
     include: SESSION_INCLUDE,
   });
-  return rows.map((r) => serializeSession(r, null));
+  return rows.map((r) => serializeSession(r));
 }
