@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LogOut, Pencil } from "lucide-react";
+import { LogOut, Pencil, Bookmark } from "lucide-react";
 
 import { getCurrentUserProfile } from "@/queries/users";
 import { BottomNav } from "@/components/bottom-nav";
@@ -44,16 +44,28 @@ export default async function ProfilPage() {
             {profile.bio && (
               <p className="text-sm text-muted-foreground">{profile.bio}</p>
             )}
-            <Link
-              href="/profil/modifier"
-              className={buttonVariants({
-                variant: "outline",
-                className: "h-9 rounded-xl",
-              })}
-            >
-              <Pencil className="size-4" />
-              Modifier mon profil
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Link
+                href="/profil/modifier"
+                className={buttonVariants({
+                  variant: "outline",
+                  className: "h-9 rounded-xl",
+                })}
+              >
+                <Pencil className="size-4" />
+                Modifier mon profil
+              </Link>
+              <Link
+                href="/profil/enregistrements"
+                className={buttonVariants({
+                  variant: "outline",
+                  className: "h-9 rounded-xl",
+                })}
+              >
+                <Bookmark className="size-4" />
+                Posts enregistrés
+              </Link>
+            </div>
           </CardContent>
         </Card>
 

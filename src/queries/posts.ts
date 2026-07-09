@@ -157,6 +157,55 @@ export async function getFeed(params: FeedParams = {}) {
 }
 
 /**
+ * Posts enregistrés (bookmarkés) par l'utilisateur courant, du plus
+ * récemment enregistré au plus ancien.
+ *
+ * Retourne un tableau vide si personne n'est authentifié. Ids déjà
+ * sérialisés en `string` : passable tel quel à un Client Component.
+ */
+export async function getBookmarkedPosts(): Promise<FeedPost[]> {
+  const viewerId = await getSessionUserId();
+  if (viewerId === null) return [];
+
+  const rows = await prisma.post.findMany({
+    where: { bookmarks: { some: { userId: viewerId } } },
+    include: {
+      ...POST_BASE_INCLUDE(viewerId),
+      media: { orderBy: { position: "asc" as const } },
+      poll: {
+        select: {
+          id: true,
+          question: true,
+          options: { select: { id: true, label: true }, orderBy: { id: "asc" as const } },
+        },
+      },
+      bookmarks: { where: { userId: viewerId }, select: { createdAt: true } },
+    },
+  });
+
+  // Trie par date d'enregistrement (le plus récent d'abord) — non exprimable
+  // en `orderBy` Prisma sur une relation filtrée, donc fait en mémoire.
+  rows.sort((a, b) => b.bookmarks[0].createdAt.getTime() - a.bookmarks[0].createdAt.getTime());
+
+  return rows.map((row) => ({
+    ...serializePostBase(row),
+    media: row.media.map((m) => ({
+      id: String(m.id),
+      type: m.type,
+      url: m.url,
+      position: m.position,
+    })),
+    poll: row.poll
+      ? {
+          id: String(row.poll.id),
+          question: row.poll.question,
+          options: row.poll.options.map((o) => ({ id: String(o.id), label: o.label })),
+        }
+      : null,
+  }));
+}
+
+/**
  * Détail d'un post : auteur, catégorie, thématiques, médias (triés par
  * position), sondage + options, commentaires (avec auteur, du plus ancien au
  * plus récent), compteurs likes/commentaires et état perso (isLiked /
