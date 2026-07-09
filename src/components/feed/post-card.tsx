@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { User } from "lucide-react";
 import type { FeedPost } from "@/queries/posts";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PostCardMedia } from "./post-card-media";
 import { PostCardActions } from "./post-card-actions";
 import { PostCardMenu } from "./post-card-menu";
@@ -21,59 +21,80 @@ function relativeTime(date: Date): string {
   return `${Math.floor(diffD / 7)}sem`;
 }
 
+// Une couleur de marque par catégorie pour repérer le type de post d'un coup d'œil.
+const CATEGORY_STYLES: Record<string, string> = {
+  Entraide: "bg-primary/10 text-primary",
+  Projet: "bg-accent/10 text-accent",
+  Événement: "bg-[#FFD84A]/20 text-[#a37c00]",
+  Annonce: "bg-destructive/10 text-destructive",
+};
+const DEFAULT_CATEGORY_STYLE = "bg-primary/10 text-primary";
+
 export function PostCard({ post }: { post: FeedPost }) {
   const [deleted, setDeleted] = useState(false);
   if (deleted) return null;
 
-  return (
-    <article className="border border-border rounded-[10px] p-[10px] flex flex-col gap-[10px]">
+  const initials = post.author.name
+    .split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
+  return (
+    <article
+      id={`post-${post.id}`}
+      className="flex flex-col gap-3 scroll-mt-20 rounded-2xl bg-card p-4 shadow-sm"
+    >
       {/* Header : avatar + nom/rôle + timestamp */}
       <div className="flex items-start justify-between gap-2">
         <Link
           href={`/profil/${post.author.id}`}
-          className="flex items-center gap-3 min-w-0 hover:opacity-80 transition-opacity"
+          className="flex min-w-0 items-center gap-3 transition-opacity hover:opacity-80"
         >
-          <div className="size-[38px] rounded-[10px] bg-muted flex items-center justify-center shrink-0 overflow-hidden">
-            {post.author.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={post.author.avatarUrl} alt={post.author.name} className="size-full object-cover" />
-            ) : (
-              <User size={20} strokeWidth={1.5} className="text-muted-foreground" />
-            )}
-          </div>
+          <Avatar size="lg" className="shrink-0">
+            <AvatarImage src={post.author.avatarUrl ?? undefined} alt={post.author.name} />
+            <AvatarFallback>{initials}</AvatarFallback>
+          </Avatar>
           <div className="min-w-0">
-            <p className="text-[12px] font-bold leading-tight truncate">{post.author.name}</p>
-            <p className="text-[12px] font-normal leading-tight text-foreground truncate">
+            <p className="truncate text-sm font-bold leading-tight">{post.author.name}</p>
+            <p className="truncate text-xs leading-tight text-muted-foreground">
               {post.author.role}
             </p>
           </div>
         </Link>
-        <div className="flex items-center gap-1 shrink-0 mt-0.5">
-          <span className="text-[12px] font-bold">{relativeTime(post.createdAt)}</span>
+        <div className="mt-0.5 flex shrink-0 items-center gap-1">
+          <span className="text-xs font-semibold text-muted-foreground">
+            {relativeTime(post.createdAt)}
+          </span>
           {post.isAuthor && (
             <PostCardMenu postId={post.id} onDeleted={() => setDeleted(true)} />
           )}
         </div>
       </div>
 
-      {/* Badges : catégorie (muted) + thématiques (léger, distinct de la catégorie) */}
-      <div className="flex gap-2 flex-wrap">
-        <span className="px-[10px] py-1 h-6 rounded-[10px] bg-muted text-[12px] font-bold leading-none flex items-center">
+      {/* Badges : catégorie (couleur de marque) + thématiques (neutre) */}
+      <div className="flex flex-wrap gap-1.5">
+        <span
+          className={`flex h-6 items-center rounded-lg px-2.5 text-xs font-bold ${
+            CATEGORY_STYLES[post.category.name] ?? DEFAULT_CATEGORY_STYLE
+          }`}
+        >
           {post.category.name}
         </span>
         {post.topics.map((t) => (
-          <span key={t.id} className="px-[10px] py-1 h-6 rounded-[10px] bg-foreground/5 text-[12px] font-bold leading-none flex items-center">
+          <span
+            key={t.id}
+            className="flex h-6 items-center rounded-lg bg-muted px-2.5 text-xs font-semibold text-muted-foreground"
+          >
             {t.name}
           </span>
         ))}
       </div>
 
-      {/* Contenu texte + lien Détails */}
+      {/* Contenu texte */}
       {post.content && (
-        <div className="flex flex-col gap-1">
-          <p className="text-[14px] font-bold leading-snug">{post.content}</p>
-        </div>
+        <p className="text-sm leading-relaxed font-bold">{post.content}</p>
       )}
 
       {/* Média ou sondage */}
@@ -82,6 +103,8 @@ export function PostCard({ post }: { post: FeedPost }) {
       {/* Actions */}
       <PostCardActions
         postId={post.id}
+        authorId={post.author.id}
+        isAuthor={post.isAuthor}
         counts={post.counts}
         isLiked={post.isLiked}
         isBookmarked={post.isBookmarked}

@@ -20,7 +20,7 @@ export function PostCardMedia({
     // next/image ne sait pas l'optimiser, on retombe sur <img> dans ce cas.
     const isBlobPreview = firstImage.url.startsWith("blob:");
     return (
-      <div className="relative w-full aspect-[16/9] rounded-[10px] overflow-hidden border border-border bg-muted">
+      <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-border bg-muted">
         {isBlobPreview ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={firstImage.url} alt="" className="absolute inset-0 size-full object-cover" />
@@ -33,7 +33,7 @@ export function PostCardMedia({
 
   if (firstVideo) {
     return (
-      <div className="relative w-full aspect-[16/9] rounded-[10px] overflow-hidden border border-border bg-muted">
+      <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-border bg-muted">
         <video
           src={firstVideo.url}
           controls
@@ -53,7 +53,7 @@ export function PostCardMedia({
 // Placeholder affiché dans le wireframe quand l'image n'est pas encore chargée
 export function PostCardMediaPlaceholder() {
   return (
-    <div className="relative w-full aspect-[16/9] rounded-[10px] border border-border bg-muted flex items-center justify-center">
+    <div className="relative w-full aspect-[16/9] rounded-2xl border border-border bg-muted flex items-center justify-center">
       <ImageIcon size={24} strokeWidth={1.5} className="text-muted-foreground" />
     </div>
   );
