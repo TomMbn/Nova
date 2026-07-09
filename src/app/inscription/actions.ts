@@ -57,7 +57,6 @@ export async function completeProfile(
   const prenom = String(formData.get("prenom") || "").trim();
   const nom = String(formData.get("nom") || "").trim();
   const bio = String(formData.get("bio") || "").trim();
-  const skillsRaw = String(formData.get("skills") || "");
   const classId = String(formData.get("classId") || "");
   const company = String(formData.get("company") || "").trim();
 
@@ -87,12 +86,7 @@ export async function completeProfile(
   }
 
   const skillNames = [
-    ...new Set(
-      skillsRaw
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
-    ),
+    ...new Set(formData.getAll("skills").map(String).filter(Boolean)),
   ];
   for (const name of skillNames) {
     const skill = await prisma.skill.upsert({

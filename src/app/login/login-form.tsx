@@ -5,7 +5,6 @@ import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 import { loginOrSignup, type LoginState } from "./actions";
 
@@ -20,10 +19,15 @@ export function LoginForm() {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="email">Adresse e-mail</Label>
+      <div>
+        <label
+          htmlFor="email"
+          className="mb-1.5 block text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+        >
+          Adresse e-mail <span className="text-destructive">*</span>
+        </label>
         <div className="relative">
-          <Mail className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Mail className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             id="email"
             name="email"
@@ -31,15 +35,20 @@ export function LoginForm() {
             placeholder="votre@email.com"
             autoComplete="email"
             required
-            className="h-11 rounded-xl pl-9"
+            className="h-11 rounded-xl border-none bg-muted pl-10 text-sm"
           />
         </div>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="password">Mot de passe</Label>
+      <div>
+        <label
+          htmlFor="password"
+          className="mb-1.5 block text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+        >
+          Mot de passe <span className="text-destructive">*</span>
+        </label>
         <div className="relative">
-          <Lock className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Lock className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             id="password"
             name="password"
@@ -47,12 +56,12 @@ export function LoginForm() {
             placeholder="Votre mot de passe"
             autoComplete="current-password"
             required
-            className="h-11 rounded-xl pl-9 pr-9"
+            className="h-11 rounded-xl border-none bg-muted pr-10 pl-10 text-sm"
           />
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            className="absolute top-1/2 right-3.5 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             aria-label={
               showPassword
                 ? "Masquer le mot de passe"
@@ -68,12 +77,12 @@ export function LoginForm() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-sm">
+      <div className="flex items-center justify-between text-xs">
         <label className="flex items-center gap-2 text-muted-foreground">
           <input type="checkbox" name="remember" className="size-4 rounded border-input" />
           Se souvenir de moi
         </label>
-        <a href="#" className="text-foreground underline-offset-4 hover:underline">
+        <a href="#" className="font-semibold text-primary">
           Mot de passe oublié ?
         </a>
       </div>
@@ -85,7 +94,7 @@ export function LoginForm() {
       <Button
         type="submit"
         disabled={pending}
-        className="h-11 rounded-xl bg-foreground text-background hover:bg-foreground/90"
+        className="mt-1 h-11 rounded-xl text-sm font-bold"
       >
         {pending ? "Connexion..." : "Se connecter"}
       </Button>

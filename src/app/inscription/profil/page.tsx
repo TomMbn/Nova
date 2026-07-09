@@ -24,9 +24,11 @@ export default async function ProfilInscriptionPage() {
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-6 py-10">
       <StepProgress step={3} total={3} />
 
-      <div className="flex flex-col gap-1 text-center">
-        <h1 className="text-xl font-semibold">Complétez votre profil</h1>
-        <p className="text-sm text-muted-foreground">
+      <div className="flex flex-col gap-1.5">
+        <h1 className="text-2xl font-bold tracking-tight">
+          Complétez votre profil
+        </h1>
+        <p className="text-sm leading-relaxed text-muted-foreground">
           Ces informations seront visibles par la communauté.
         </p>
       </div>

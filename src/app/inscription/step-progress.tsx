@@ -1,14 +1,17 @@
 export function StepProgress({ step, total }: { step: number; total: number }) {
+  const percent = Math.round((step / total) * 100);
+
   return (
-    <div className="flex items-center justify-center gap-1.5">
-      {Array.from({ length: total }, (_, i) => i + 1).map((n) => (
-        <span
-          key={n}
-          className={`h-1.5 rounded-full transition-all ${
-            n === step ? "w-6 bg-foreground" : "w-1.5 bg-muted"
-          }`}
+    <div className="flex flex-col gap-2">
+      <span className="text-xs font-semibold tracking-widest text-primary uppercase">
+        Étape {step} sur {total}
+      </span>
+      <div className="h-1 w-full rounded-full bg-muted">
+        <div
+          className="h-full rounded-full bg-primary transition-all"
+          style={{ width: `${percent}%` }}
         />
-      ))}
+      </div>
     </div>
   );
 }

@@ -4,12 +4,28 @@ import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { completeProfile, type CompleteProfileState } from "../actions";
 
 const initialState: CompleteProfileState = {};
+
+const SUGGESTED_SKILLS = [
+  "Front-end",
+  "Back-end",
+  "UX Research",
+  "Figma",
+  "Motion Design",
+  "Gestion de projet",
+  "Data Analysis",
+  "Illustration",
+  "SEO",
+  "Python",
+];
+
+const fieldLabel =
+  "mb-1.5 block text-xs font-semibold tracking-wider text-muted-foreground uppercase";
+const fieldInput = "h-11 rounded-xl border-none bg-muted text-sm";
 
 export function ProfileForm({
   classes,
@@ -24,50 +40,62 @@ export function ProfileForm({
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="prenom">Prénom</Label>
-          <Input
-            id="prenom"
-            name="prenom"
-            required
-            className="h-11 rounded-xl"
-          />
+        <div>
+          <label htmlFor="prenom" className={fieldLabel}>
+            Prénom <span className="text-destructive">*</span>
+          </label>
+          <Input id="prenom" name="prenom" required className={fieldInput} />
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="nom">Nom</Label>
-          <Input id="nom" name="nom" required className="h-11 rounded-xl" />
+        <div>
+          <label htmlFor="nom" className={fieldLabel}>
+            Nom <span className="text-destructive">*</span>
+          </label>
+          <Input id="nom" name="nom" required className={fieldInput} />
         </div>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="bio">Bio</Label>
+      <div>
+        <label htmlFor="bio" className={fieldLabel}>
+          Bio
+        </label>
         <Textarea
           id="bio"
           name="bio"
           placeholder="Parlez-nous de vous..."
-          className="min-h-24 rounded-xl"
+          className="min-h-20 rounded-xl border-none bg-muted text-sm"
         />
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="skills">Compétences</Label>
-        <Input
-          id="skills"
-          name="skills"
-          placeholder="ex : React, Figma..."
-          className="h-11 rounded-xl"
-        />
-        <p className="text-xs text-muted-foreground">Séparez par des virgules.</p>
+      <div>
+        <span className={fieldLabel}>Compétences clés</span>
+        <div className="flex flex-wrap gap-2">
+          {SUGGESTED_SKILLS.map((skill) => (
+            <label
+              key={skill}
+              className="cursor-pointer rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold transition-colors has-[:checked]:border-transparent has-[:checked]:bg-accent/10 has-[:checked]:text-accent"
+            >
+              <input
+                type="checkbox"
+                name="skills"
+                value={skill}
+                className="sr-only"
+              />
+              {skill}
+            </label>
+          ))}
+        </div>
       </div>
 
       {classes.length > 0 && (
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="classId">Classe</Label>
+        <div>
+          <label htmlFor="classId" className={fieldLabel}>
+            Classe
+          </label>
           <select
             id="classId"
             name="classId"
             defaultValue=""
-            className="h-11 w-full rounded-xl border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className={`w-full border-none bg-muted px-3 text-sm outline-none ${fieldInput}`}
           >
             <option value="">Sélectionnez votre classe</option>
             {classes.map((c) => (
@@ -79,9 +107,11 @@ export function ProfileForm({
         </div>
       )}
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="company">Entreprise actuelle (si applicable)</Label>
-        <Input id="company" name="company" className="h-11 rounded-xl" />
+      <div>
+        <label htmlFor="company" className={fieldLabel}>
+          Entreprise actuelle (si applicable)
+        </label>
+        <Input id="company" name="company" className={fieldInput} />
       </div>
 
       {state.error && <p className="text-sm text-destructive">{state.error}</p>}
@@ -89,9 +119,9 @@ export function ProfileForm({
       <Button
         type="submit"
         disabled={pending}
-        className="h-11 rounded-xl bg-foreground text-background hover:bg-foreground/90"
+        className="mt-1 h-11 rounded-xl text-sm font-bold"
       >
-        {pending ? "Enregistrement..." : "Enregistrer"}
+        {pending ? "Enregistrement..." : "Commencer l'aventure 🚀"}
       </Button>
     </form>
   );

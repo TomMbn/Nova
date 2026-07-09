@@ -41,7 +41,9 @@ export function EditProfileForm({
   return (
     <form action={formAction} className="flex flex-col gap-4 pb-6">
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="name">Nom complet</Label>
+        <Label htmlFor="name">
+          Nom complet <span className="text-destructive">*</span>
+        </Label>
         <Input
           id="name"
           name="name"
