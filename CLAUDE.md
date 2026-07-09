@@ -11,40 +11,31 @@ connaître avant de toucher au domaine :
 
 ### Espace Formations
 
-Fonctionnalité accessible à tous les utilisateurs authentifiés, depuis un espace dédié.
-Deux types de formations totalement distincts (pas de table parente commune) :
+Deux types de formations totalement distincts (pas de table parente commune).
+Chaque type porte une ou plusieurs thématiques (`Topic`) via des tables de
+jointure dédiées (`formation_video_topic`, `formation_session_topic`).
 
-- **FormationVideo** — catalogue de vidéos accessibles via abonnement mensuel
-  (8–12€, paiement CB mocké, durée 30 jours). Modèles : `FormationVideo`,
-  `Subscription`. Actions : `activateSubscription`, `cancelSubscription`.
+- **FormationVideo** — catalogue de vidéos en accès libre pour tous les
+  utilisateurs authentifiés. Pas d'abonnement, pas de paiement.
 
-- **FormationSession** — sessions en présentiel. Trois rôles possibles par
-  session (`FormationRegistration.role`) :
-  - `PARTICIPANT` : réserve une place, paie 20€ CB (mocké) ou 1 crédit.
-  - `ANIMATEUR` : propose et anime une session. Reçoit automatiquement
-    1 crédit après la date de fin (attribution lazy via `claimPendingCredits`
-    au chargement de la page — champ `creditedAt` sur `FormationRegistration`
-    sert de marqueur "déjà crédité").
-  - `JURY` : s'inscrit pour évaluer des pitchs, participation gratuite.
+- **FormationSession** — sessions en présentiel, **réservées aux alumni**
+  (guard `role.name === "Alumni"` dans l'action). L'inscription se fait via
+  un bouton qui crée une `FormationRegistration` en base (`status = CONFIRMED`)
+  et redirige l'utilisateur vers `FormationSession.cpfUrl` (fiche CPF externe).
+  L'annulation suit le même principe : passage en `CANCELLED` + redirect CPF.
 
-  Un utilisateur ne peut avoir qu'**un seul rôle par session**
+  Un utilisateur ne peut avoir qu'**une seule inscription par session**
   (contrainte `UNIQUE(userId, sessionId)` en base).
 
-  Après participation, les crédits peuvent être utilisés pour s'inscrire
-  gratuitement à une prochaine session présentielle. Le solde est stocké
-  directement dans `User.credits` (Int). La déduction de crédit est atomique
-  dans la transaction d'inscription (`updateMany` avec `WHERE credits >= 1`
-  pour éviter le passage en négatif).
-
-  Avis possibles uniquement pour les `PARTICIPANT` avec `status = CONFIRMED`,
+  Avis possibles pour tout utilisateur avec `status = CONFIRMED`,
   un seul avis par session (`UNIQUE(userId, sessionId)` sur `Review`).
 
 Points de vigilance :
 - `FormationRegistration.status` : `PENDING | CONFIRMED | CANCELLED`
 - `FormationSession.status` : `OPEN | DONE | CANCELLED`
-- `Subscription.status` : `ACTIVE | CANCELLED`
-- Annulation d'une inscription : remboursement crédit uniquement si
-  `paymentMethod = CREDIT` ET `session.status = OPEN`.
+- Pas de système de paiement ni de crédits pour les formations.
+- `registerForSession` charge le rôle via une requête séparée (`requireUser`
+  ne retourne pas les relations).
 
 - **Catégorie** qualifie un post, une seule par post (`post.category_id`).
 - **Thématique** (`Topic`) qualifie un post, plusieurs possibles

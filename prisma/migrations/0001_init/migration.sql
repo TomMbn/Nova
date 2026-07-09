@@ -28,7 +28,6 @@ CREATE TABLE "user" (
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "role_id" BIGINT NOT NULL,
     "current_class_id" BIGINT,
-    "credits" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
@@ -191,22 +190,6 @@ CREATE TABLE "vote" (
 );
 
 -- CreateTable
-CREATE TABLE "formation_video_topic" (
-    "video_id" BIGINT NOT NULL,
-    "topic_id" BIGINT NOT NULL,
-
-    CONSTRAINT "formation_video_topic_pkey" PRIMARY KEY ("video_id","topic_id")
-);
-
--- CreateTable
-CREATE TABLE "formation_session_topic" (
-    "session_id" BIGINT NOT NULL,
-    "topic_id" BIGINT NOT NULL,
-
-    CONSTRAINT "formation_session_topic_pkey" PRIMARY KEY ("session_id","topic_id")
-);
-
--- CreateTable
 CREATE TABLE "formation_video" (
     "id" BIGSERIAL NOT NULL,
     "title" VARCHAR(255) NOT NULL,
@@ -223,35 +206,37 @@ CREATE TABLE "formation_session" (
     "description" TEXT NOT NULL,
     "date" TIMESTAMPTZ NOT NULL,
     "location" VARCHAR(255) NOT NULL,
-    "capacity" INTEGER NOT NULL,
     "status" VARCHAR(20) NOT NULL DEFAULT 'OPEN',
+    "cpf_url" VARCHAR(500) NOT NULL,
 
     CONSTRAINT "formation_session_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
+CREATE TABLE "formation_video_topic" (
+    "video_id" BIGINT NOT NULL,
+    "topic_id" BIGINT NOT NULL,
+
+    CONSTRAINT "formation_video_topic_pkey" PRIMARY KEY ("video_id","topic_id")
+);
+
+-- CreateTable
+CREATE TABLE "formation_session_topic" (
+    "session_id" BIGINT NOT NULL,
+    "topic_id" BIGINT NOT NULL,
+
+    CONSTRAINT "formation_session_topic_pkey" PRIMARY KEY ("session_id","topic_id")
+);
+
+-- CreateTable
 CREATE TABLE "formation_registration" (
     "id" BIGSERIAL NOT NULL,
-    "role" VARCHAR(20) NOT NULL,
     "status" VARCHAR(20) NOT NULL DEFAULT 'PENDING',
-    "payment_method" VARCHAR(20),
-    "credited_at" TIMESTAMPTZ,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "user_id" BIGINT NOT NULL,
     "session_id" BIGINT NOT NULL,
 
     CONSTRAINT "formation_registration_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "subscription" (
-    "id" BIGSERIAL NOT NULL,
-    "status" VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
-    "start_date" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "end_date" TIMESTAMPTZ,
-    "user_id" BIGINT NOT NULL,
-
-    CONSTRAINT "subscription_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -407,9 +392,6 @@ ALTER TABLE "formation_registration" ADD CONSTRAINT "formation_registration_user
 
 -- AddForeignKey
 ALTER TABLE "formation_registration" ADD CONSTRAINT "formation_registration_session_id_foreign" FOREIGN KEY ("session_id") REFERENCES "formation_session"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE "subscription" ADD CONSTRAINT "subscription_user_id_foreign" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "review" ADD CONSTRAINT "review_user_id_foreign" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;

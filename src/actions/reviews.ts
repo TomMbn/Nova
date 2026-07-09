@@ -27,8 +27,8 @@ export async function leaveReview(
   const registration = await prisma.formationRegistration.findUnique({
     where: { userId_sessionId: { userId: user.id, sessionId: sid } },
   });
-  if (!registration || registration.role !== "PARTICIPANT" || registration.status !== "CONFIRMED")
-    return fail("Vous devez avoir participé à cette session pour laisser un avis.");
+  if (!registration || registration.status !== "CONFIRMED")
+    return fail("Vous devez être inscrit et confirmé à cette session pour laisser un avis.");
 
   const existing = await prisma.review.findUnique({
     where: { userId_sessionId: { userId: user.id, sessionId: sid } },

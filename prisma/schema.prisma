@@ -60,8 +60,6 @@ model User {
   currentClass   Class?  @relation(fields: [currentClassId], references: [id], map: "user_current_class_id_foreign", onDelete: NoAction, onUpdate: NoAction)
   currentClassId BigInt? @map("current_class_id")
 
-  credits Int @default(0)
-
   posts              Post[]
   comments           Comment[]
   sentMessages       Message[]          @relation("MessageSender")
@@ -73,7 +71,6 @@ model User {
   bookmarks          Bookmark[]
   votes              Vote[]
   experiences        Experience[]
-  subscriptions      Subscription[]
   registrations      FormationRegistration[]
   reviews            Review[]
 
@@ -307,9 +304,9 @@ model FormationSession {
   description String
   date        DateTime @db.Timestamptz
   location    String   @db.VarChar(255)
-  capacity    Int
   // OPEN : inscriptions ouvertes ; DONE : session passée ; CANCELLED : annulée
   status      String   @default("OPEN") @db.VarChar(20)
+  cpfUrl      String   @map("cpf_url") @db.VarChar(500)
 
   registrations FormationRegistration[]
   reviews       Review[]
@@ -338,15 +335,10 @@ model FormationSessionTopic {
   @@map("formation_session_topic")
 }
 
-// role : PARTICIPANT | ANIMATEUR | JURY
-// paymentMethod : CB | CREDIT (null si pas encore payé / gratuit jury)
 model FormationRegistration {
-  id            BigInt    @id @default(autoincrement())
-  role          String    @db.VarChar(20)
-  status        String    @default("PENDING") @db.VarChar(20)
-  paymentMethod String?   @map("payment_method") @db.VarChar(20)
-  creditedAt    DateTime? @map("credited_at") @db.Timestamptz
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  id        BigInt   @id @default(autoincrement())
+  status    String   @default("PENDING") @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   user      User             @relation(fields: [userId], references: [id], map: "formation_registration_user_id_foreign", onDelete: NoAction, onUpdate: NoAction)
   userId    BigInt           @map("user_id")
@@ -355,18 +347,6 @@ model FormationRegistration {
 
   @@unique([userId, sessionId], map: "formation_registration_user_session_unique")
   @@map("formation_registration")
-}
-
-model Subscription {
-  id        BigInt    @id @default(autoincrement())
-  status    String    @default("ACTIVE") @db.VarChar(20)
-  startDate DateTime  @default(now()) @map("start_date") @db.Timestamptz
-  endDate   DateTime? @map("end_date") @db.Timestamptz
-
-  user   User   @relation(fields: [userId], references: [id], map: "subscription_user_id_foreign", onDelete: NoAction, onUpdate: NoAction)
-  userId BigInt @map("user_id")
-
-  @@map("subscription")
 }
 
 model Review {
