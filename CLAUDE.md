@@ -87,11 +87,24 @@ explicitement aux frontières (ex. `src/auth.ts` fait `String(user.id)` avant
 de le mettre dans la session/JWT).
 
 **Client Prisma généré à un emplacement custom, avec un point d'entrée
-non standard.** Le générateur `prisma-client` (nouveau générateur ESM) sort
-dans `src/generated/prisma/` sans `index.ts` : le point d'entrée est
-`client.ts`, donc l'import correct est `@/generated/prisma/client` (voir
-`src/lib/prisma.ts`), **pas** `@/generated/prisma`. Ce dossier est généré
-(`postinstall`/`prisma generate`) — ne pas l'éditer à la main.
+non standard, et sans moteur binaire natif.** Le générateur `prisma-client`
+(nouveau générateur ESM) sort dans `src/generated/prisma/` sans `index.ts` :
+le point d'entrée est `client.ts`, donc l'import correct est
+`@/generated/prisma/client` (voir `src/lib/prisma.ts`), **pas**
+`@/generated/prisma`. Ce dossier doit rester sous `src/` (pas
+`node_modules`) : le générateur `prisma-client` produit du TypeScript source
+brut que Turbopack refuse de traiter s'il est placé dans `node_modules`
+("Unknown module type").
+
+`engineType = "client"` dans le générateur : moteur WASM (pas de Query
+Engine binaire par plateforme) combiné à l'adaptateur driver
+`@prisma/adapter-neon` dans `src/lib/prisma.ts`. Nécessaire pour Vercel — le
+file-tracing des fonctions serverless n'embarque pas fiablement un moteur
+binaire situé hors de `node_modules`, ce qui provoquait un
+`PrismaClientInitializationError` en prod avec l'ancien moteur "library".
+
+Ce dossier est généré (`postinstall`/`prisma generate`) — ne pas l'éditer à
+la main.
 
 **Auth** : NextAuth v5 (beta) dans `src/auth.ts`, provider Credentials
 uniquement, stratégie de session JWT (pas d'Account/Session en base malgré
