@@ -5,7 +5,7 @@ export function TopBar() {
   return (
     <header className="flex items-center justify-between gap-3 px-[14px] py-[15px] bg-background sticky top-0 z-40">
       <Link
-        href=""
+        href="/recherche"
         className="flex items-center justify-center size-[46px] rounded-[10px] hover:bg-muted transition-colors"
         aria-label="Rechercher"
       >
