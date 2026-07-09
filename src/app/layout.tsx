@@ -15,13 +15,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "École Communauté",
+  title: "Nova",
   description:
     "Réseau social communautaire de l'école — futurs, actuels et anciens élèves, intervenants, équipe pédagogique.",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "École Communauté",
+    title: "Nova",
   },
   icons: {
     icon: [
