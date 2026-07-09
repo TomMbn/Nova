@@ -16,53 +16,48 @@ function relativeTime(date: Date): string {
 
 export function PostCard({ post }: { post: FeedPost }) {
   return (
-    <article className="border border-border rounded-[10px] p-[10px] flex flex-col gap-3">
-      {/* Header : avatar + nom + rôle + timestamp */}
+    <article className="border border-[#e8e8e8] rounded-[10px] p-[10px] flex flex-col gap-[10px]">
+
+      {/* Header : avatar + nom/rôle + timestamp */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="size-[38px] rounded-[10px] bg-muted flex items-center justify-center shrink-0 overflow-hidden">
+          <div className="size-[38px] rounded-[10px] bg-[#e8e8e8] flex items-center justify-center shrink-0 overflow-hidden">
             {post.author.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={post.author.avatarUrl}
-                alt={post.author.name}
-                className="size-full object-cover"
-              />
+              <img src={post.author.avatarUrl} alt={post.author.name} className="size-full object-cover" />
             ) : (
-              <User size={20} strokeWidth={1.5} className="text-muted-foreground" />
+              <User size={20} strokeWidth={1.5} className="text-[#888]" />
             )}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-bold leading-tight truncate">{post.author.name}</p>
-            <p className="text-xs text-muted-foreground leading-tight truncate">
+            <p className="text-[12px] font-bold leading-tight truncate">{post.author.name}</p>
+            <p className="text-[12px] font-normal leading-tight text-foreground truncate">
               {post.author.role}
             </p>
           </div>
         </div>
-        <span className="text-xs text-muted-foreground shrink-0 mt-0.5">
-          {relativeTime(post.createdAt)}
-        </span>
+        <span className="text-[12px] font-bold shrink-0 mt-0.5">{relativeTime(post.createdAt)}</span>
       </div>
 
-      {/* Badges : catégorie + thématiques */}
+      {/* Badges : catégorie (#e8e8e8) + thématiques (#f7f7f7) */}
       <div className="flex gap-2 flex-wrap">
-        <span className="px-3 py-1 rounded-[10px] bg-muted text-xs font-bold">
+        <span className="px-[10px] py-1 h-6 rounded-[10px] bg-[#e8e8e8] text-[12px] font-bold leading-none flex items-center">
           {post.category.name}
         </span>
         {post.topics.map((t) => (
-          <span key={t.id} className="px-3 py-1 rounded-[10px] bg-muted text-xs font-bold">
+          <span key={t.id} className="px-[10px] py-1 h-6 rounded-[10px] bg-[#f7f7f7] text-[12px] font-bold leading-none flex items-center">
             {t.name}
           </span>
         ))}
       </div>
 
-      {/* Contenu texte */}
+      {/* Contenu texte + lien Détails */}
       {post.content && (
-        <div className="flex flex-col gap-0.5">
-          <p className="text-sm font-bold leading-snug">{post.content}</p>
+        <div className="flex flex-col gap-1">
+          <p className="text-[14px] font-bold leading-snug">{post.content}</p>
           <Link
             href={`/posts/${post.id}`}
-            className="text-xs text-muted-foreground hover:underline w-fit"
+            className="text-[12px] font-normal text-foreground w-fit hover:underline"
           >
             Détails
           </Link>
