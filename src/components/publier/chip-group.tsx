@@ -40,7 +40,7 @@ export function ChipGroup({
             type="button"
             onClick={() => onToggle(opt.id)}
             className={cn(
-              "px-[14px] h-8 rounded-[10px] text-[13px] font-bold leading-none transition-colors border",
+              "px-[14px] h-8 rounded-full text-[13px] font-medium leading-none transition-colors border",
               isSelected
                 ? "bg-primary border-primary text-primary-foreground"
                 : "bg-background border-border text-foreground hover:bg-muted"
@@ -55,7 +55,7 @@ export function ChipGroup({
           type="button"
           onClick={() => setExpanded(true)}
           aria-label="Afficher plus d'options"
-          className="flex items-center justify-center size-8 rounded-[10px] border border-border hover:bg-muted transition-colors shrink-0"
+          className="flex items-center justify-center size-8 rounded-full border border-border hover:bg-muted transition-colors shrink-0"
         >
           <Plus size={16} strokeWidth={1.8} />
         </button>
