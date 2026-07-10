@@ -1,15 +1,13 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, GraduationCap, MessageCircle } from "lucide-react";
+import { ChevronLeft, MessageCircle, MoreHorizontal } from "lucide-react";
 
 import { getUserById } from "@/queries/users";
 import { getSessionUserId } from "@/lib/auth";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { BottomNav } from "@/components/bottom-nav";
 
-const SKILLS_PREVIEW_COUNT = 7;
+import { ProfileTabs } from "./profile-tabs";
 
 function formatPeriod(start: Date | null, end: Date | null, isCurrent: boolean) {
   const fmt = (d: Date) =>
@@ -42,122 +40,86 @@ export default async function PublicProfilePage({
     .join("")
     .toUpperCase();
 
-  const visibleSkills = profile.skills.slice(0, SKILLS_PREVIEW_COUNT);
-  const hiddenSkillsCount = profile.skills.length - visibleSkills.length;
-
   return (
-    <div className="flex flex-col min-h-full pb-20">
-      <header className="flex items-center gap-3 px-[14px] py-[15px] bg-background sticky top-0 z-40">
+    <div className="flex min-h-full flex-col">
+      <header className="flex items-center justify-between px-4 py-4">
         <Link
           href="/recherche"
-          className="flex items-center justify-center size-[40px] rounded-[10px] hover:bg-muted transition-colors"
+          className="flex size-8 items-center justify-center rounded-full bg-muted"
           aria-label="Retour"
         >
-          <ArrowLeft size={20} strokeWidth={1.8} />
+          <ChevronLeft size={16} strokeWidth={2} />
         </Link>
-        <h1 className="flex-1 text-center text-sm font-bold pr-[40px]">Profil</h1>
+        <h2 className="text-base font-bold">Profil</h2>
+        <button
+          type="button"
+          className="flex size-8 items-center justify-center rounded-full bg-muted"
+          aria-label="Plus d'options"
+        >
+          <MoreHorizontal size={16} strokeWidth={2} />
+        </button>
       </header>
 
-      <main className="flex-1 flex flex-col gap-4 px-4 pt-1">
-        <Card>
-          <CardContent className="flex flex-col gap-4">
-            <div className="flex items-start gap-3">
-              <Avatar size="lg" className="size-16">
-                <AvatarImage src={profile.avatarUrl ?? undefined} alt={profile.name} />
-                <AvatarFallback className="text-lg">{initials}</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col gap-1.5 pt-0.5">
-                <h2 className="text-lg font-semibold leading-tight">{profile.name}</h2>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="secondary">{profile.role.name}</Badge>
-                </div>
-                {profile.currentClass && (
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <GraduationCap className="size-3.5 shrink-0" />
-                    <span>{profile.currentClass.name}</span>
-                  </div>
-                )}
-              </div>
+      <div className="relative px-4">
+        <div className="h-24 rounded-2xl bg-gradient-to-r from-primary/30 via-accent/20 to-[#FFD84A]/30" />
+        <div className="absolute -bottom-6 left-8 size-16 overflow-hidden rounded-2xl ring-4 ring-background">
+          {profile.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={profile.avatarUrl}
+              alt={profile.name}
+              className="size-full object-cover"
+            />
+          ) : (
+            <div className="flex size-full items-center justify-center bg-muted text-lg font-semibold text-muted-foreground">
+              {initials}
             </div>
+          )}
+        </div>
+      </div>
 
+      <main className="flex-1 flex flex-col gap-4 px-4 pt-8">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1.5">
+            <h1 className="text-lg font-bold">{profile.name}</h1>
+            <p className="text-sm text-muted-foreground">
+              {profile.role.name}
+              {profile.currentClass && ` — ${profile.currentClass.name}`}
+            </p>
             {profile.bio && (
               <p className="text-sm text-muted-foreground">{profile.bio}</p>
             )}
+          </div>
 
-            <Link
-              href={`/messages/${id}`}
-              className={buttonVariants({ className: "h-10 rounded-xl" })}
-            >
-              <MessageCircle className="size-4" />
-              Envoyer un message
-            </Link>
-          </CardContent>
-        </Card>
+          <Link
+            href={`/messages/${id}`}
+            className={buttonVariants({ className: "h-11 rounded-xl text-sm font-bold" })}
+          >
+            <MessageCircle className="size-4" />
+            Envoyer un message
+          </Link>
+        </div>
 
-        {profile.skills.length > 0 && (
-          <Card>
-            <CardContent className="flex flex-col gap-2">
-              <h3 className="text-sm font-medium">Compétences</h3>
-              <div className="flex flex-wrap gap-2">
-                {visibleSkills.map(({ skill }) => (
-                  <Badge key={String(skill.id)} variant="outline">
-                    {skill.name}
-                  </Badge>
-                ))}
-                {hiddenSkillsCount > 0 && (
-                  <Badge variant="outline">+{hiddenSkillsCount}</Badge>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {profile.experiences.length > 0 && (
-          <Card>
-            <CardContent className="flex flex-col gap-3">
-              <h3 className="text-sm font-medium">Parcours</h3>
-              <div className="flex flex-col">
-                {profile.experiences.map((experience, index) => {
-                  const isLast = index === profile.experiences.length - 1;
-                  const period = formatPeriod(
-                    experience.startDate,
-                    experience.endDate,
-                    experience.isCurrent
-                  );
-
-                  return (
-                    <div key={String(experience.id)} className="flex gap-3">
-                      <div className="flex flex-col items-center">
-                        <span className="mt-1.5 size-2 rounded-full bg-foreground shrink-0" />
-                        {!isLast && <span className="w-px flex-1 bg-border" />}
-                      </div>
-                      <div className="flex-1 flex flex-col gap-0.5 pb-4">
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="text-sm font-medium">
-                            {experience.title
-                              ? `${experience.title} — ${experience.company.name}`
-                              : experience.company.name}
-                          </span>
-                          {period && (
-                            <span className="text-xs text-muted-foreground shrink-0">
-                              {period}
-                            </span>
-                          )}
-                        </div>
-                        {experience.isCurrent && (
-                          <Badge variant="secondary" className="w-fit">
-                            Actuel
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <ProfileTabs
+          skills={profile.skills.map(({ skill }) => ({
+            id: String(skill.id),
+            name: skill.name,
+          }))}
+          experiences={profile.experiences.map((experience) => ({
+            id: String(experience.id),
+            label: experience.title
+              ? `${experience.title} — ${experience.company.name}`
+              : experience.company.name,
+            period: formatPeriod(
+              experience.startDate,
+              experience.endDate,
+              experience.isCurrent
+            ),
+            isCurrent: experience.isCurrent,
+          }))}
+        />
       </main>
+      <BottomNav />
     </div>
   );
 }
