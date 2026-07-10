@@ -1,9 +1,79 @@
 "use server";
 
+import { put, del } from "@vercel/blob";
+import { revalidatePath } from "next/cache";
+
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
 import { toBigInt, toBigIntList } from "@/lib/bigint";
 import { ok, fail, type ActionResult } from "@/lib/action";
+
+const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
+
+/**
+ * Remplace la photo de profil de l'utilisateur courant. L'ancienne photo
+ * (si stockée sur Vercel Blob) est supprimée après écriture de la nouvelle.
+ */
+export async function updateAvatar(
+  formData: FormData
+): Promise<ActionResult<{ avatarUrl: string }>> {
+  const user = await requireUser();
+
+  const file = formData.get("avatar");
+  if (!(file instanceof File) || file.size === 0) {
+    return fail("Aucune image sélectionnée.");
+  }
+  if (!file.type.startsWith("image/")) {
+    return fail("Le fichier doit être une image.");
+  }
+  if (file.size > MAX_AVATAR_SIZE_BYTES) {
+    return fail("Image trop volumineuse (max 5 Mo).");
+  }
+
+  const previous = await prisma.user.findUniqueOrThrow({
+    where: { id: user.id },
+    select: { avatarUrl: true },
+  });
+
+  const ext = file.name.split(".").pop()?.slice(0, 10) || "jpg";
+  const blob = await put(`avatars/${user.id}-${crypto.randomUUID()}.${ext}`, file, {
+    access: "public",
+  });
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { avatarUrl: blob.url },
+  });
+
+  if (previous.avatarUrl?.includes(".public.blob.vercel-storage.com")) {
+    await del(previous.avatarUrl).catch(() => {});
+  }
+
+  revalidatePath("/profil");
+  return ok({ avatarUrl: blob.url });
+}
+
+/** Retire la photo de profil de l'utilisateur courant. */
+export async function deleteAvatar(): Promise<ActionResult<void>> {
+  const user = await requireUser();
+
+  const previous = await prisma.user.findUniqueOrThrow({
+    where: { id: user.id },
+    select: { avatarUrl: true },
+  });
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { avatarUrl: null },
+  });
+
+  if (previous.avatarUrl?.includes(".public.blob.vercel-storage.com")) {
+    await del(previous.avatarUrl).catch(() => {});
+  }
+
+  revalidatePath("/profil");
+  return ok(undefined);
+}
 
 /**
  * Met à jour le profil de l'utilisateur courant : identité, classe,
