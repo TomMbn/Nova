@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ChevronLeft, MessageCircle, MoreHorizontal } from "lucide-react";
+import { ChevronLeft, MessageCircle } from "lucide-react";
 
 import { getUserById } from "@/queries/users";
 import { getSessionUserId } from "@/lib/auth";
@@ -8,6 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { BottomNav } from "@/components/bottom-nav";
 
 import { ProfileTabs } from "./profile-tabs";
+import { ProfileOptionsMenu } from "./profile-options-menu";
 
 function formatPeriod(start: Date | null, end: Date | null, isCurrent: boolean) {
   const fmt = (d: Date) =>
@@ -51,13 +52,7 @@ export default async function PublicProfilePage({
           <ChevronLeft size={16} strokeWidth={2} />
         </Link>
         <h2 className="text-base font-bold">Profil</h2>
-        <button
-          type="button"
-          className="flex size-8 items-center justify-center rounded-full bg-muted"
-          aria-label="Plus d'options"
-        >
-          <MoreHorizontal size={16} strokeWidth={2} />
-        </button>
+        <ProfileOptionsMenu />
       </header>
 
       <div className="relative px-4">

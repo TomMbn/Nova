@@ -1,13 +1,25 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { FeedPost } from "@/queries/posts";
 import { PostCard } from "./post-card";
 import { PublishToast } from "@/components/ui/publish-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type Category = { id: string; name: string };
+
+const SORTS = [
+  { id: "recent", label: "Plus récents" },
+  { id: "popular", label: "Plus aimés" },
+] as const;
+type Sort = (typeof SORTS)[number]["id"];
 
 export function FeedWithFilter({
   initialPosts,
@@ -17,10 +29,15 @@ export function FeedWithFilter({
   categories: Category[];
 }) {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [sort, setSort] = useState<Sort>("recent");
 
   const filtered = activeId
     ? initialPosts.filter((p) => p.category.id === activeId)
-    : initialPosts;
+    : [...initialPosts];
+
+  if (sort === "popular") {
+    filtered.sort((a, b) => b.counts.likes - a.counts.likes);
+  }
 
   return (
     <>
@@ -52,12 +69,22 @@ export function FeedWithFilter({
             </button>
           ))}
         </div>
-        <button
-          className="shrink-0 flex items-center justify-center size-8 rounded-xl hover:bg-muted transition-colors"
-          aria-label="Filtres avancés"
-        >
-          <SlidersHorizontal size={18} strokeWidth={1.8} />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className="shrink-0 flex items-center justify-center size-8 rounded-xl hover:bg-muted transition-colors"
+            aria-label="Trier les posts"
+          >
+            <SlidersHorizontal size={18} strokeWidth={1.8} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {SORTS.map((s) => (
+              <DropdownMenuItem key={s.id} onClick={() => setSort(s.id)}>
+                {s.label}
+                {sort === s.id && <Check className="ml-auto size-3.5" />}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <Suspense>
