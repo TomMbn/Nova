@@ -162,7 +162,7 @@ export function ProfileTabs({
         ))}
       </div>
 
-      <div className="flex flex-1 flex-col gap-4 bg-gray-50 px-4 pt-4 pb-24">
+      <div className="flex flex-1 flex-col gap-4 bg-gray-50 px-4 pt-4 pb-24 dark:bg-muted">
         {tab === "Aperçu" && (
           <>
             {skills.length > 0 && <SkillsPreview skills={skills} />}

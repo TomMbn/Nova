@@ -28,7 +28,7 @@ export function SearchFiltersForm({
   hasActiveFilters: boolean;
 }) {
   return (
-    <form action="/recherche" className="flex flex-col gap-6 px-[18px] pt-4">
+    <form action="/recherche" className="flex min-w-0 flex-col gap-6 px-[18px] pt-4">
       {companyId && <input type="hidden" name="companyId" value={companyId} />}
 
       {companyName && (
@@ -52,20 +52,26 @@ export function SearchFiltersForm({
         />
       </div>
 
-      <FilterChipGroup key={roleId ?? "roleId-none"} name="roleId" options={roles} value={roleId} />
+      <div className="flex items-center gap-2">
+        <FilterChipGroup key={roleId ?? "roleId-none"} name="roleId" options={roles} value={roleId} />
+      </div>
 
       <div className="flex flex-col gap-3">
         <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
           Compétence
         </span>
-        <FilterChipGroup key={skillId ?? "skillId-none"} name="skillId" options={skills} value={skillId} />
+        <div className="flex items-center gap-2">
+          <FilterChipGroup key={skillId ?? "skillId-none"} name="skillId" options={skills} value={skillId} />
+        </div>
       </div>
 
       <div className="flex flex-col gap-3">
         <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
           Promotion
         </span>
-        <FilterChipGroup key={classId ?? "classId-none"} name="classId" options={classes} value={classId} />
+        <div className="flex items-center gap-2">
+          <FilterChipGroup key={classId ?? "classId-none"} name="classId" options={classes} value={classId} />
+        </div>
       </div>
 
       <div className="flex flex-col items-center gap-4">

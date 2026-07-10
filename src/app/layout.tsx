@@ -34,6 +34,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#27b7c4",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -47,7 +49,7 @@ export default function RootLayout({
       className={`${jakartaSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col overflow-x-hidden">
         <Providers>
           {children}
           <ServiceWorkerRegister />

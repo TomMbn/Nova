@@ -20,7 +20,7 @@ export function FilterChipGroup({
   const [selected, setSelected] = useState(value ?? null);
 
   return (
-    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+    <div className="flex flex-1 min-w-0 gap-2 overflow-x-auto no-scrollbar pb-1">
       {options.map((opt) => (
         <label key={opt.id} className="shrink-0">
           <input
