@@ -84,7 +84,9 @@ export async function deleteAvatar(): Promise<ActionResult<void>> {
  *  - bio        (optionnel)
  *  - classId    (optionnel) n'a de sens que pour le rôle "Élève actuel"
  *  - topicIds   (0..n)      remplace entièrement les thématiques suivies
- *  - skills     (optionnel) noms séparés par des virgules, remplace la liste
+ *  - skills     (0..n)      cases cochées, remplace entièrement la liste
+ *  - otherSkills(optionnel) noms libres séparés par des virgules, ajoutés
+ *                aux compétences cochées
  *  - company    (optionnel) entreprise actuelle ; vide = retire l'expérience
  *                courante enregistrée depuis ce formulaire
  */
@@ -103,8 +105,10 @@ export async function updateProfile(
   );
   const skillNames = [
     ...new Set(
-      String(formData.get("skills") ?? "")
-        .split(",")
+      [
+        ...formData.getAll("skills").map((v) => String(v)),
+        ...String(formData.get("otherSkills") ?? "").split(","),
+      ]
         .map((s) => s.trim())
         .filter(Boolean)
     ),
