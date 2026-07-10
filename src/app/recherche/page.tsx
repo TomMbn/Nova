@@ -37,7 +37,7 @@ export default async function RecherchePage({
 
   return (
     <>
-      <div className="flex flex-col min-h-full pb-20">
+      <div className="flex min-w-0 flex-col min-h-full overflow-x-hidden pb-20">
         <TopBar />
 
         <div className="flex flex-col gap-4 px-[18px] pt-5">
