@@ -47,8 +47,8 @@ export function BottomNav() {
   }, [pathname, fetchUnreadCount]);
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 bg-background pb-[env(safe-area-inset-bottom)]">
-      <ul className="flex items-center justify-around h-16 px-4">
+    <nav className="fixed bottom-0 inset-x-0 z-50 border-t border-border bg-background pb-[env(safe-area-inset-bottom)]">
+      <ul className="flex items-center justify-around px-3 pt-2 pb-1">
         {NAV_ITEMS.map(({ href, icon: Icon, label, publish }) => {
           const active = pathname === href;
 
@@ -56,8 +56,8 @@ export function BottomNav() {
             return (
               <li key={href}>
                 <Link href={href} aria-label={label}>
-                  <span className="flex items-center justify-center size-[39px] rounded-[10px] bg-muted transition-opacity active:opacity-60">
-                    <Icon size={20} strokeWidth={2} className="text-foreground" />
+                  <span className="flex -mt-2 size-11 items-center justify-center rounded-xl bg-foreground shadow-lg transition-opacity active:opacity-70">
+                    <Icon size={20} strokeWidth={2.5} className="text-background" />
                   </span>
                 </Link>
               </li>
@@ -74,13 +74,14 @@ export function BottomNav() {
                   showBadge ? `${label} (${unreadCount} non lu${unreadCount > 1 ? "s" : ""})` : label
                 }
                 className={cn(
-                  "relative flex items-center justify-center transition-opacity active:opacity-60",
-                  active ? "opacity-100" : "opacity-40"
+                  "relative flex flex-col items-center gap-1 px-2 py-1 transition-colors",
+                  active ? "text-foreground" : "text-muted-foreground"
                 )}
               >
-                <Icon size={24} strokeWidth={active ? 2 : 1.5} />
+                <Icon size={20} strokeWidth={active ? 2.2 : 1.8} />
+                <span className="text-[10px] font-semibold">{label}</span>
                 {showBadge && (
-                  <Badge className="absolute -top-1.5 -right-2 h-4 min-w-4 px-1 text-[10px] opacity-100">
+                  <Badge className="absolute -top-1 right-0 h-4 min-w-4 px-1 text-[10px]">
                     {unreadCount > 9 ? "9+" : unreadCount}
                   </Badge>
                 )}
