@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ChevronLeft, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 
 import { getUserById } from "@/queries/users";
 import { getSessionUserId } from "@/lib/auth";
 import { buttonVariants } from "@/components/ui/button";
 import { BottomNav } from "@/components/bottom-nav";
+import { BackButton } from "@/components/back-button";
 
 import { ProfileTabs } from "./profile-tabs";
 import { ProfileOptionsMenu } from "./profile-options-menu";
@@ -44,13 +45,7 @@ export default async function PublicProfilePage({
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <header className="flex items-center justify-between px-4 py-4">
-        <Link
-          href="/recherche"
-          className="flex size-8 items-center justify-center rounded-full bg-muted"
-          aria-label="Retour"
-        >
-          <ChevronLeft size={16} strokeWidth={2} />
-        </Link>
+        <BackButton fallbackHref="/recherche" />
         <h2 className="text-base font-bold">Profil</h2>
         <ProfileOptionsMenu />
       </header>
