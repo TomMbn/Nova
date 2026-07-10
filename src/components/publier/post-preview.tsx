@@ -81,7 +81,7 @@ export function PostPreview({
             </p>
           </div>
         ) : (
-          <p className="text-[14px] font-bold leading-snug whitespace-pre-wrap">{body}</p>
+          <p className="text-[14px] leading-relaxed whitespace-pre-wrap">{body}</p>
         );
       })()}
 

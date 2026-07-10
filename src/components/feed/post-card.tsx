@@ -104,7 +104,7 @@ export function PostCard({ post }: { post: FeedPost }) {
             </p>
           </div>
         ) : (
-          <p className="text-sm leading-relaxed font-bold whitespace-pre-wrap">{body}</p>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">{body}</p>
         );
       })()}
 
