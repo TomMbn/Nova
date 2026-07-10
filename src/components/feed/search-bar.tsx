@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Search, Building2 } from "lucide-react";
@@ -44,6 +45,7 @@ export function SearchBar() {
   const [companies, setCompanies] = useState<QuickSearchCompany[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
 
   useEffect(() => {
     const trimmed = query.trim();
@@ -78,6 +80,25 @@ export function SearchBar() {
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
+  // Recalcule la position du dropdown à chaque ouverture ou resize
+  useEffect(() => {
+    if (!open || !containerRef.current) return;
+    function updatePosition() {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      setDropdownStyle({
+        position: "fixed",
+        top: rect.bottom + 8,
+        left: rect.left,
+        width: rect.width,
+        zIndex: 9999,
+      });
+    }
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    return () => window.removeEventListener("resize", updatePosition);
+  }, [open]);
+
   function goToFullResults() {
     setOpen(false);
     router.push(`/recherche?q=${encodeURIComponent(query.trim())}`);
@@ -106,8 +127,8 @@ export function SearchBar() {
         />
       </div>
 
-      {open && query.trim() && (
-        <div className="absolute inset-x-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-border bg-popover shadow-lg">
+      {open && query.trim() && createPortal(
+        <div className="overflow-hidden rounded-2xl border border-border bg-popover shadow-lg" style={dropdownStyle}>
           <div className="flex border-b border-border">
             {TABS.map((t) => (
               <button
@@ -221,7 +242,8 @@ export function SearchBar() {
           >
             Voir tous les résultats pour « {query.trim()} »
           </button>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
