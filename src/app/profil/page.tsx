@@ -31,7 +31,7 @@ export default async function ProfilPage() {
     .toUpperCase();
 
   return (
-    <div className="flex min-h-full flex-col">
+    <div className="flex min-h-full flex-1 flex-col">
       <header className="flex items-center justify-between px-4 py-4">
         <Link
           href="/"
