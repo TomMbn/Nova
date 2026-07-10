@@ -2,19 +2,24 @@ import type { FormationVideo } from "@/queries/formations";
 
 export function FormationVideoCard({ formation }: { formation: FormationVideo }) {
   return (
-    <article className="border border-border rounded-[10px] p-[10px] flex flex-col gap-[10px]">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-[12px] font-bold leading-tight">{formation.title}</p>
+    <article className="flex flex-col gap-3 rounded-2xl bg-card p-4 shadow-sm">
+      {/* Lecteur vidéo intégré */}
+      <div className="w-full aspect-video rounded-xl overflow-hidden bg-muted">
+        <video
+          src={formation.videoUrl}
+          controls
+          className="w-full h-full object-cover"
+          preload="metadata"
+        />
       </div>
 
-      {/* Topics */}
+      {/* Thématiques (couleur de marque, cf. PostCard) */}
       {formation.topics.length > 0 && (
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex flex-wrap gap-1.5">
           {formation.topics.map((t) => (
             <span
               key={t.id}
-              className="px-[10px] py-1 h-6 rounded-[10px] bg-muted text-[12px] font-bold leading-none flex items-center"
+              className="flex h-6 items-center rounded-lg bg-primary/10 px-2.5 text-xs font-bold text-primary"
             >
               {t.name}
             </span>
@@ -22,17 +27,11 @@ export function FormationVideoCard({ formation }: { formation: FormationVideo })
         </div>
       )}
 
-      {/* Description */}
-      <p className="text-[12px] font-normal leading-snug">{formation.description}</p>
-
-      {/* Lecteur vidéo intégré */}
-      <div className="rounded-[10px] overflow-hidden bg-muted aspect-video w-full">
-        <video
-          src={formation.videoUrl}
-          controls
-          className="w-full h-full object-cover"
-          preload="metadata"
-        />
+      <div className="flex flex-col gap-1">
+        <h3 className="text-sm font-bold leading-snug">{formation.title}</h3>
+        <p className="text-xs leading-relaxed text-muted-foreground line-clamp-2">
+          {formation.description}
+        </p>
       </div>
     </article>
   );
