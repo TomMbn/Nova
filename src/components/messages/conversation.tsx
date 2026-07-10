@@ -17,9 +17,14 @@ type Props = {
 };
 
 function formatTime(date: Date) {
+  // hourCycle explicite : sans lui, l'ICU de Node (SSR) et celui du
+  // navigateur peuvent résoudre le format par défaut différemment (12h vs
+  // 24h) pour la même locale/fuseau, ce qui casse l'hydration.
   return new Intl.DateTimeFormat("fr-FR", {
     hour: "2-digit",
     minute: "2-digit",
+    hourCycle: "h23",
+    timeZone: "Europe/Paris",
   }).format(new Date(date));
 }
 
