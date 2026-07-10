@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Calendar, MoreHorizontal } from "lucide-react";
 import { getSessionUserId } from "@/lib/auth";
 import { getMessagesWith } from "@/queries/messages";
 import { getUserById } from "@/queries/users";
 import { markAsRead } from "@/actions/messages";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TopBar } from "@/components/feed/top-bar";
 import { Conversation } from "@/components/messages/conversation";
 
 export default async function ConversationPage({
@@ -35,19 +36,35 @@ export default async function ConversationPage({
 
   return (
     <div className="flex flex-col h-svh">
-      {/* Header */}
-      <header className="flex items-center gap-3 px-[14px] py-[15px] sticky top-0 bg-background z-40 border-b border-border">
+      <TopBar />
+
+      {/* Header conversation */}
+      <header className="flex items-center gap-3 px-[14px] py-[10px] bg-background z-40 border-b border-border">
         <Link
           href="/messages"
           className="flex items-center justify-center size-[38px] rounded-[10px] hover:bg-muted transition-colors shrink-0"
         >
           <ArrowLeft size={20} strokeWidth={1.8} />
         </Link>
-        <Avatar size="sm">
+        <Avatar className="size-[48px] shrink-0">
           <AvatarImage src={partner.avatarUrl ?? undefined} alt={partner.name} />
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
-        <span className="text-[14px] font-bold truncate">{partner.name}</span>
+        <div className="flex flex-col flex-1 min-w-0">
+          <span className="text-[15px] font-bold truncate">{partner.name}</span>
+          <div className="flex items-center gap-[5px]">
+            <span className="size-[8px] rounded-full bg-green-500 shrink-0" />
+            <span className="text-[12px] text-muted-foreground">En ligne</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <button className="flex items-center justify-center size-[38px] rounded-[10px] hover:bg-muted transition-colors">
+            <Calendar size={18} strokeWidth={1.8} className="text-primary" />
+          </button>
+          <button className="flex items-center justify-center size-[38px] rounded-[10px] hover:bg-muted transition-colors">
+            <MoreHorizontal size={18} strokeWidth={1.8} />
+          </button>
+        </div>
       </header>
 
       <Conversation

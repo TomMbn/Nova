@@ -97,7 +97,7 @@ export function Conversation({ partnerId, currentUserId, initialMessages }: Prop
         {messages.map((msg) => {
           const isMe = msg.senderId === currentUserId;
           return (
-            <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+            <div key={msg.id} className={`flex flex-col gap-1 ${isMe ? "items-end" : "items-start"}`}>
               <div
                 className={`max-w-[75%] px-[14px] py-[10px] rounded-[16px] ${
                   isMe
@@ -106,10 +106,10 @@ export function Conversation({ partnerId, currentUserId, initialMessages }: Prop
                 }`}
               >
                 <p className="text-[14px] leading-snug whitespace-pre-wrap break-words">{msg.content}</p>
-                <p className={`text-[10px] mt-1 ${isMe ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                  {formatTime(msg.createdAt)}
-                </p>
               </div>
+              <span className="text-[10px] text-muted-foreground px-1">
+                {formatTime(msg.createdAt)}
+              </span>
             </div>
           );
         })}
@@ -117,7 +117,12 @@ export function Conversation({ partnerId, currentUserId, initialMessages }: Prop
       </div>
 
       {/* Zone de saisie */}
-      <div className="px-[14px] py-3 border-t border-border flex gap-2 items-end">
+      <div className="px-[14px] py-3 border-t border-border flex gap-2 items-center">
+        <button className="flex items-center justify-center size-[42px] rounded-full bg-muted shrink-0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+          </svg>
+        </button>
         <textarea
           ref={textareaRef}
           value={content}
@@ -125,13 +130,13 @@ export function Conversation({ partnerId, currentUserId, initialMessages }: Prop
           onKeyDown={handleKeyDown}
           placeholder="Écrire un message…"
           rows={1}
-          className="flex-1 resize-none rounded-[12px] border border-border bg-muted px-[14px] py-[10px] text-[14px] outline-none focus:border-foreground placeholder:text-muted-foreground max-h-[120px] overflow-y-auto"
+          className="flex-1 resize-none rounded-full border border-border bg-muted px-[18px] py-[11px] text-[14px] outline-none focus:border-foreground placeholder:text-muted-foreground max-h-[120px] overflow-y-auto"
           style={{ lineHeight: "1.4" }}
         />
         <button
           onClick={handleSend}
           disabled={!content.trim() || isSending}
-          className="flex items-center justify-center size-[42px] rounded-full bg-primary text-primary-foreground shrink-0 disabled:opacity-40 transition-opacity"
+          className="flex items-center justify-center size-[42px] rounded-full bg-muted shrink-0 disabled:opacity-40 transition-opacity"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="22" y1="2" x2="11" y2="13" />
