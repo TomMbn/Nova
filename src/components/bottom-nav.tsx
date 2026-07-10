@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, Plus, Headphones, MessageCircle } from "lucide-react";
+import { Home, Search, Plus, BookOpen, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { href: "/", icon: Home, label: "Accueil", publish: false },
   { href: "/recherche", icon: Search, label: "Recherche", publish: false },
   { href: "/publier", icon: Plus, label: "Publier", publish: true },
-  { href: "/formations", icon: Headphones, label: "Formations", publish: false },
+  { href: "/formations", icon: BookOpen, label: "Formations", publish: false },
   { href: "/messages", icon: MessageCircle, label: "Messages", publish: false },
 ] as const;
 

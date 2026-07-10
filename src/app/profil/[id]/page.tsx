@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, MessageCircle } from "lucide-react";
+import { ChevronLeft, MessageCircle, MoreHorizontal } from "lucide-react";
 
 import { getUserById } from "@/queries/users";
 import { getSessionUserId } from "@/lib/auth";
@@ -42,17 +42,25 @@ export default async function PublicProfilePage({
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="absolute top-0 z-40 flex w-full items-center gap-3 px-[14px] py-[15px]">
+      <header className="flex items-center justify-between px-4 py-4">
         <Link
           href="/recherche"
-          className="flex size-10 items-center justify-center rounded-full bg-background/90 backdrop-blur transition-colors hover:bg-muted"
+          className="flex size-8 items-center justify-center rounded-full bg-muted"
           aria-label="Retour"
         >
-          <ArrowLeft size={20} strokeWidth={1.8} />
+          <ChevronLeft size={16} strokeWidth={2} />
         </Link>
+        <h2 className="text-base font-bold">Profil</h2>
+        <button
+          type="button"
+          className="flex size-8 items-center justify-center rounded-full bg-muted"
+          aria-label="Plus d'options"
+        >
+          <MoreHorizontal size={16} strokeWidth={2} />
+        </button>
       </header>
 
-      <div className="relative px-4 pt-[15px]">
+      <div className="relative px-4">
         <div className="h-24 rounded-2xl bg-gradient-to-r from-primary/30 via-accent/20 to-[#FFD84A]/30" />
         <div className="absolute -bottom-6 left-8 size-16 overflow-hidden rounded-2xl ring-4 ring-background">
           {profile.avatarUrl ? (
