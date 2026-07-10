@@ -16,7 +16,7 @@ export function getClasses() {
 }
 
 export function getRoles() {
-  return prisma.role.findMany({ orderBy: { name: "asc" } });
+  return prisma.role.findMany({ orderBy: { id: "asc" } });
 }
 
 export function getTopics() {

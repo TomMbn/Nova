@@ -24,6 +24,12 @@ const TOPICS = [
   { slug: "data", name: "Data" },
   { slug: "marketing", name: "Marketing" },
   { slug: "design", name: "Design" },
+  { slug: "vie-etudiante", name: "Vie étudiante" },
+  { slug: "sport", name: "Sport" },
+  { slug: "culture", name: "Culture" },
+  { slug: "bien-etre", name: "Bien-être" },
+  { slug: "entrepreneuriat", name: "Entrepreneuriat" },
+  { slug: "networking", name: "Networking" },
 ];
 
 const SKILLS = [
@@ -282,6 +288,12 @@ async function main() {
   const topicDesign = await prisma.topic.findFirstOrThrow({ where: { slug: "design" } });
   const topicData = await prisma.topic.findFirstOrThrow({ where: { slug: "data" } });
   const topicMarketing = await prisma.topic.findFirstOrThrow({ where: { slug: "marketing" } });
+  const topicVieEtudiante = await prisma.topic.findFirstOrThrow({ where: { slug: "vie-etudiante" } });
+  const topicSport = await prisma.topic.findFirstOrThrow({ where: { slug: "sport" } });
+  const topicCulture = await prisma.topic.findFirstOrThrow({ where: { slug: "culture" } });
+  const topicBienEtre = await prisma.topic.findFirstOrThrow({ where: { slug: "bien-etre" } });
+  const topicEntrepreneuriat = await prisma.topic.findFirstOrThrow({ where: { slug: "entrepreneuriat" } });
+  const topicNetworking = await prisma.topic.findFirstOrThrow({ where: { slug: "networking" } });
 
   // --- Préférences de notif (thématiques & catégories suivies) ---
   const followedTopics: [bigint, bigint][] = [
@@ -571,58 +583,98 @@ async function main() {
   }
 
   // --- Formations vidéo ---
-  const video1 = await prisma.formationVideo.upsert({
-    where: { id: BigInt(1) },
-    update: {},
-    create: {
-      id: BigInt(1),
+  // Fichiers d'exemple publics (test-videos.co.uk, MDN cc0-videos,
+  // samplelib.com) : contenu placeholder mais chaque vidéo est un fichier
+  // distinct et effectivement accessible (le bucket Google Cloud Storage
+  // utilisé précédemment renvoie désormais 403 sur tous ses fichiers).
+  const videos: {
+    title: string;
+    description: string;
+    videoUrl: string;
+    topicIds: bigint[];
+  }[] = [
+    {
       title: "Introduction à React et Next.js",
       description: "Découvrez les bases de React et Next.js pour créer des applications web modernes. Au programme : composants, props, état et routing.",
-      videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+      videoUrl: "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4",
+      topicIds: [topicDev.id],
     },
-  });
-  await prisma.formationVideoTopic.upsert({
-    where: { videoId_topicId: { videoId: video1.id, topicId: topicDev.id } },
-    update: {},
-    create: { videoId: video1.id, topicId: topicDev.id },
-  });
-
-  const video2 = await prisma.formationVideo.upsert({
-    where: { id: BigInt(2) },
-    update: {},
-    create: {
-      id: BigInt(2),
+    {
       title: "Fondamentaux du UX Design",
       description: "Les principes clés du design centré utilisateur : recherche, wireframing, prototypage et tests utilisateurs.",
-      videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+      videoUrl: "https://test-videos.co.uk/vids/sintel/mp4/h264/360/Sintel_360_10s_1MB.mp4",
+      topicIds: [topicUX.id, topicDesign.id],
     },
-  });
-  await prisma.formationVideoTopic.upsert({
-    where: { videoId_topicId: { videoId: video2.id, topicId: topicUX.id } },
-    update: {},
-    create: { videoId: video2.id, topicId: topicUX.id },
-  });
-  await prisma.formationVideoTopic.upsert({
-    where: { videoId_topicId: { videoId: video2.id, topicId: topicDesign.id } },
-    update: {},
-    create: { videoId: video2.id, topicId: topicDesign.id },
-  });
-
-  const video3 = await prisma.formationVideo.upsert({
-    where: { id: BigInt(3) },
-    update: {},
-    create: {
-      id: BigInt(3),
+    {
       title: "SQL et bases de données relationnelles",
       description: "Maîtrisez SQL de zéro : requêtes SELECT, jointures, agrégations et optimisation des performances.",
-      videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+      videoUrl: "https://test-videos.co.uk/vids/jellyfish/mp4/h264/360/Jellyfish_360_10s_1MB.mp4",
+      topicIds: [topicData.id],
     },
-  });
-  await prisma.formationVideoTopic.upsert({
-    where: { videoId_topicId: { videoId: video3.id, topicId: topicData.id } },
-    update: {},
-    create: { videoId: video3.id, topicId: topicData.id },
-  });
+    {
+      title: "Réussir son intégration en école",
+      description: "Vie associative, campus, logement, budget étudiant : les conseils des anciens pour bien démarrer l'année.",
+      videoUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+      topicIds: [topicVieEtudiante.id],
+    },
+    {
+      title: "Gérer son stress avant les rendus de projet",
+      description: "Respiration, organisation, sommeil : des techniques concrètes pour traverser les périodes de rush sans s'épuiser.",
+      videoUrl: "https://download.samplelib.com/mp4/sample-5s.mp4",
+      topicIds: [topicBienEtre.id],
+    },
+    {
+      title: "Sport et vie associative sur le campus",
+      description: "Tour d'horizon des clubs sportifs et associations étudiantes : comment s'inscrire, participer aux tournois inter-écoles.",
+      videoUrl: "https://download.samplelib.com/mp4/sample-10s.mp4",
+      topicIds: [topicSport.id, topicVieEtudiante.id],
+    },
+    {
+      title: "Lancer son premier projet entrepreneurial",
+      description: "Idéation, validation de marché, premiers clients : le parcours type d'un∙e étudiant∙e qui monte son projet pendant ses études.",
+      videoUrl: "https://download.samplelib.com/mp4/sample-15s.mp4",
+      topicIds: [topicEntrepreneuriat.id],
+    },
+    {
+      title: "Réseauter efficacement en tant qu'étudiant",
+      description: "LinkedIn, événements alumni, forums entreprises : comment construire son réseau professionnel avant même la fin des études.",
+      videoUrl: "https://download.samplelib.com/mp4/sample-20s.mp4",
+      topicIds: [topicNetworking.id],
+    },
+    {
+      title: "Panorama de la scène culturelle locale",
+      description: "Musées, concerts, festivals : les bons plans culture accessibles aux étudiants autour du campus.",
+      videoUrl: "https://download.samplelib.com/mp4/sample-30s.mp4",
+      topicIds: [topicCulture.id],
+    },
+    {
+      title: "Growth marketing pour projets étudiants",
+      description: "Acquisition à petit budget, réseaux sociaux, bouche-à-oreille : les leviers marketing accessibles pour un projet étudiant.",
+      videoUrl: "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_5MB.mp4",
+      topicIds: [topicMarketing.id],
+    },
+  ];
+
+  for (const [index, video] of videos.entries()) {
+    const id = BigInt(index + 1);
+    const created = await prisma.formationVideo.upsert({
+      where: { id },
+      update: { title: video.title, description: video.description, videoUrl: video.videoUrl },
+      create: {
+        id,
+        title: video.title,
+        description: video.description,
+        videoUrl: video.videoUrl,
+      },
+    });
+    for (const topicId of video.topicIds) {
+      await prisma.formationVideoTopic.upsert({
+        where: { videoId_topicId: { videoId: created.id, topicId } },
+        update: {},
+        create: { videoId: created.id, topicId },
+      });
+    }
+  }
 
   // --- Formations en présentiel ---
   // Suppression complète pour forcer la recréation avec tous les champs
@@ -711,7 +763,7 @@ async function main() {
   });
 
   console.log(
-    "✓ Seed terminé — 4 utilisateurs, 5 posts (likes/bookmarks/votes/commentaires), 5 messages, 3 vidéos, 3 sessions (inscriptions + avis)"
+    "✓ Seed terminé — 4 utilisateurs, 5 posts (likes/bookmarks/votes/commentaires), 5 messages, 10 vidéos, 3 sessions (inscriptions + avis)"
   );
 }
 
