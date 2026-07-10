@@ -1,16 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Calendar, MapPin, Users, BarChart2 } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Users, GraduationCap } from "lucide-react";
 import { getFormationSessionById } from "@/queries/formations";
 import { SessionDetailTabs } from "@/components/formations/session-detail-tabs";
 import { SessionCTA } from "@/components/formations/session-cta";
 
 function formatDate(date: Date) {
   return date.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
-}
-
-function formatTime(date: Date) {
-  return date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 }
 
 export default async function FormationSessionPage({
@@ -26,87 +22,64 @@ export default async function FormationSessionPage({
 
   return (
     <>
-      <div className="flex flex-col min-h-full">
+      <div className="flex flex-col min-h-full pb-24">
+        {/* Hero */}
+        <div className="relative w-full aspect-[390/192] shrink-0 bg-muted">
+          {session.imageUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={session.imageUrl}
+              alt={session.title}
+              className="absolute inset-0 size-full object-cover"
+            />
+          )}
+          <div className="absolute inset-0 bg-black/35" />
 
-        {/* Header */}
-        <header className="flex items-center gap-2 px-[14px] py-[15px] sticky top-0 bg-background z-40">
           <Link
             href="/formations"
-            className="flex items-center justify-center size-[38px] rounded-[10px] hover:bg-muted transition-colors shrink-0"
+            className="absolute left-4 top-4 flex size-9 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-colors hover:bg-white/30"
+            aria-label="Retour"
           >
-            <ArrowLeft size={20} strokeWidth={1.8} />
+            <ArrowLeft size={18} strokeWidth={2} />
           </Link>
-          <p className="flex-1 text-center text-[14px] font-bold">Détails de la formation</p>
-        </header>
 
-        <main className="flex-1 flex flex-col gap-4">
+          <span className="absolute right-4 top-4 rounded-full bg-accent px-3 py-1.5 text-xs font-bold text-accent-foreground">
+            Éligible CPF
+          </span>
 
-          {/* Hero */}
-          <div className="px-[14px] flex flex-col gap-3">
-            {/* Image + infos côte à côte */}
-            <div className="flex gap-3 items-start">
-              {/* Image carrée gauche */}
-              <div className="relative flex flex-col items-start gap-2 shrink-0">
-                <div className="relative size-[90px] rounded-[10px] overflow-hidden bg-muted">
-                  {session.imageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={session.imageUrl} alt={session.title} className="w-full h-full object-cover" />
-                  ) : null}
-                </div>
-                {session.capacity && (
-                  <span className="absolute bottom-2 left-1/2 -translate-x-1/2 px-2 py-1 rounded-[6px] bg-primary text-primary-foreground text-[8px] whitespace-nowrap">
-                    {session.capacity} places restantes
-                  </span>
-                )}
-              </div>
-
-              {/* Contenu droite */}
-              <div className="flex flex-col gap-1 flex-1 min-w-0">
-                <span className="inline-flex items-center self-start px-2 py-[2px] rounded-[5px] text-foreground text-[8px] tracking-wide uppercase border-[1px] border-foreground">
-                  Présentiel
-                </span>
-                <h1 className="text-[18px] font-bold leading-snug">{session.title}</h1>
-                {/* Topics scrollables */}
-                {session.topics.length > 0 && (
-                  <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                    {session.topics.map((t) => (
-                      <span
-                        key={t.id}
-                        className="shrink-0 px-[10px] py-1 h-6 rounded-[10px] border-[1px] border-border text-[12px] font-bold leading-none flex items-center"
-                      >
-                        {t.name}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+          <div className="absolute inset-x-4 bottom-4 flex flex-col gap-1.5">
+            <h1 className="text-base font-bold leading-snug text-white">{session.title}</h1>
+            {session.topics.length > 0 && (
+              <span className="flex h-5 w-fit items-center rounded-full bg-white/90 px-2.5 text-[10px] font-bold tracking-wide text-primary">
+                {session.topics[0].name}
+              </span>
+            )}
           </div>
+        </div>
 
-          {/* Info bar 4 colonnes */}
-          <div className="grid grid-cols-4 border-y border-border p-3">
-            <div className="flex flex-col items-center gap-1 text-center px-1">
-              <Calendar size={18} strokeWidth={1.8} className="text-muted-foreground" />
-              <span className="text-[10px] font-bold leading-tight">{formatDate(session.date)}</span>
-              <span className="text-[10px] text-muted-foreground">{formatTime(session.date)}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 text-center px-1 border-l border-border">
-              <MapPin size={18} strokeWidth={1.8} className="text-muted-foreground" />
-              <span className="text-[10px] font-bold leading-tight line-clamp-2">{session.location}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 text-center px-1 border-l border-border">
-              <Users size={18} strokeWidth={1.8} className="text-muted-foreground" />
-              <span className="text-[10px] font-bold">{session.registeredCount} / {session.capacity ?? "∞"}</span>
-              <span className="text-[10px] text-muted-foreground">participants</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 text-center px-1 border-l border-border">
-              <BarChart2 size={18} strokeWidth={1.8} className="text-muted-foreground" />
-              <span className="text-[10px] font-bold">{session.level ?? "—"}</span>
-              <span className="text-[10px] text-muted-foreground">Niveau</span>
-            </div>
-          </div>
+        {/* Meta bar */}
+        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar border-b border-border px-4 py-3">
+          <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+            <Calendar size={14} strokeWidth={1.8} />
+            {formatDate(session.date)}
+          </span>
+          <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+            <MapPin size={14} strokeWidth={1.8} />
+            {session.location}
+          </span>
+          <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+            <Users size={14} strokeWidth={1.8} />
+            {session.registeredCount} / {session.capacity ?? "∞"}
+          </span>
+          {session.level && (
+            <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+              <GraduationCap size={14} strokeWidth={1.8} />
+              {session.level}
+            </span>
+          )}
+        </div>
 
-          {/* Tabs + contenu (client) */}
+        <main className="flex-1">
           <SessionDetailTabs session={session} />
         </main>
       </div>
