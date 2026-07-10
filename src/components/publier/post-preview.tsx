@@ -1,4 +1,5 @@
 import { User, FileText } from "lucide-react";
+import { splitPostContent } from "@/lib/post-content";
 import { PostCardMedia } from "@/components/feed/post-card-media";
 import type { MediaItem, DocumentDraft, PollDraft } from "./content-picker";
 
@@ -22,9 +23,6 @@ export function PostPreview({
   document: DocumentDraft | null;
   poll: PollDraft | null;
 }) {
-  const isEmpty =
-    !category && topics.length === 0 && !content.trim() && media.length === 0 && !document && !poll;
-
   const previewMedia = media.map((m, i) => ({
     id: m.clientId,
     type: m.type,
@@ -73,9 +71,19 @@ export function PostPreview({
         </div>
       )}
 
-      {content.trim() && (
-        <p className="text-[14px] font-bold leading-snug whitespace-pre-wrap">{content}</p>
-      )}
+      {content.trim() && (() => {
+        const { title, body } = splitPostContent(content.trim());
+        return title ? (
+          <div className="flex flex-col gap-1">
+            <p className="text-[14px] font-bold leading-snug">{title}</p>
+            <p className="text-[14px] leading-relaxed text-muted-foreground whitespace-pre-wrap">
+              {body}
+            </p>
+          </div>
+        ) : (
+          <p className="text-[14px] font-bold leading-snug whitespace-pre-wrap">{body}</p>
+        );
+      })()}
 
       <PostCardMedia media={previewMedia} poll={null} />
 
@@ -97,10 +105,6 @@ export function PostPreview({
           <FileText size={16} strokeWidth={1.6} className="shrink-0" />
           <span className="text-xs truncate">{document.file.name}</span>
         </div>
-      )}
-
-      {isEmpty && (
-        <p className="text-[12px] text-muted-foreground">Votre post apparaîtra ici.</p>
       )}
     </article>
   );

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { FeedPost } from "@/queries/posts";
+import { splitPostContent } from "@/lib/post-content";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PostCardMedia } from "./post-card-media";
 import { PostCardActions } from "./post-card-actions";
@@ -93,9 +94,19 @@ export function PostCard({ post }: { post: FeedPost }) {
       </div>
 
       {/* Contenu texte */}
-      {post.content && (
-        <p className="text-sm leading-relaxed font-bold">{post.content}</p>
-      )}
+      {post.content && (() => {
+        const { title, body } = splitPostContent(post.content);
+        return title ? (
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-bold leading-snug">{title}</p>
+            <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+              {body}
+            </p>
+          </div>
+        ) : (
+          <p className="text-sm leading-relaxed font-bold whitespace-pre-wrap">{body}</p>
+        );
+      })()}
 
       {/* Média ou sondage */}
       <PostCardMedia media={post.media} poll={post.poll} />

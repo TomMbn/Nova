@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
+import { Eye, X } from "lucide-react";
 import { createPost } from "@/actions/posts";
 import { setPendingPost } from "@/lib/pending-post";
 import { ChipGroup } from "./chip-group";
+import { PostPreview } from "./post-preview";
 import {
   ContentPicker,
   type MediaItem,
@@ -16,12 +17,15 @@ import {
 const CONTENT_MAX_LENGTH = 1000;
 
 type Option = { id: string; name: string };
+type Author = { name: string; avatarUrl: string | null; role: string };
 
 export function CreatePostForm({
+  author,
   categories,
   topics,
   skills,
 }: {
+  author: Author;
   categories: Option[];
   topics: Option[];
   skills: Option[];
@@ -34,11 +38,21 @@ export function CreatePostForm({
   // createPost — `Skill` ne qualifie qu'une personne (`user_skill`), pas un
   // post (cf. CLAUDE.md, aucune relation post↔skill en base).
   const [skillIds, setSkillIds] = useState<string[]>([]);
+  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [document, setDocument] = useState<DocumentDraft | null>(null);
   const [poll, setPoll] = useState<PollDraft | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const hasDraftContent =
+    Boolean(categoryId) ||
+    topicIds.length > 0 ||
+    Boolean(title.trim()) ||
+    Boolean(content.trim()) ||
+    media.length > 0 ||
+    Boolean(document) ||
+    Boolean(poll);
 
   function toggleTopic(id: string) {
     setTopicIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
@@ -55,7 +69,10 @@ export function CreatePostForm({
       setError("La catégorie est requise.");
       return;
     }
-    const trimmedContent = content.trim();
+    const trimmedTitle = title.trim();
+    const trimmedContent = trimmedTitle
+      ? `${trimmedTitle}\n${content.trim()}`
+      : content.trim();
     const validPoll =
       poll && poll.question.trim() && poll.options.filter((o) => o.trim()).length >= 2
         ? poll
@@ -127,6 +144,18 @@ export function CreatePostForm({
 
         <section className="flex flex-col gap-3">
           <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Titre (optionnel)
+          </h2>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Un titre pour votre publication"
+            className="h-11 rounded-xl border border-border bg-muted/40 px-4 text-[14px] outline-none focus:border-foreground placeholder:text-muted-foreground"
+          />
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
             Votre message
           </h2>
           <div className="relative">
@@ -164,6 +193,26 @@ export function CreatePostForm({
             onChangePoll={setPoll}
           />
         </section>
+
+        {hasDraftContent && (
+          <section className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Eye size={14} strokeWidth={1.8} />
+              <h2 className="text-[11px] font-semibold uppercase tracking-wide">
+                Aperçu du post
+              </h2>
+            </div>
+            <PostPreview
+              author={author}
+              category={categories.find((c) => c.id === categoryId) ?? null}
+              topics={topics.filter((t) => topicIds.includes(t.id))}
+              content={title.trim() ? `${title.trim()}\n${content}` : content}
+              media={media}
+              document={document}
+              poll={poll}
+            />
+          </section>
+        )}
 
         {error && <p className="text-sm text-destructive">{error}</p>}
 
