@@ -52,24 +52,24 @@ export function SearchFiltersForm({
         />
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 items-center gap-2">
         <FilterChipGroup key={roleId ?? "roleId-none"} name="roleId" options={roles} value={roleId} />
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex min-w-0 flex-col gap-3">
         <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
           Compétence
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <FilterChipGroup key={skillId ?? "skillId-none"} name="skillId" options={skills} value={skillId} />
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex min-w-0 flex-col gap-3">
         <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
           Promotion
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <FilterChipGroup key={classId ?? "classId-none"} name="classId" options={classes} value={classId} />
         </div>
       </div>

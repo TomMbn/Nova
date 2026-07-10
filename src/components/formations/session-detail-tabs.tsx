@@ -23,7 +23,7 @@ export function SessionDetailTabs({ session }: { session: FormationSession }) {
   return (
     <>
       {/* Tabs scrollables */}
-      <div className="flex overflow-x-auto no-scrollbar border-b border-border px-[14px]">
+      <div className="flex overflow-x-auto overscroll-x-contain no-scrollbar border-b border-border px-[14px] [contain:layout]">
         {TABS.map((t) => (
           <button
             key={t}

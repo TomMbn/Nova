@@ -46,7 +46,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${jakartaSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${jakartaSans.variable} ${geistMono.variable} h-full overflow-x-hidden antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col overflow-x-hidden">

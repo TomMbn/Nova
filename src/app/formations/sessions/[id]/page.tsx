@@ -58,7 +58,7 @@ export default async function FormationSessionPage({
         </div>
 
         {/* Meta bar */}
-        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar border-b border-border px-4 py-3">
+        <div className="flex items-center gap-4 overflow-x-auto overscroll-x-contain no-scrollbar border-b border-border px-4 py-3 [contain:layout]">
           <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-muted-foreground">
             <Calendar size={14} strokeWidth={1.8} />
             {formatDate(session.date)}

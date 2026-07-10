@@ -41,8 +41,8 @@ export function FeedWithFilter({
 
   return (
     <>
-      <div className="flex items-center gap-2 border-b border-border bg-background px-[14px] py-[10px]">
-        <div className="flex flex-1 gap-2 overflow-x-auto no-scrollbar">
+      <div className="flex min-w-0 items-center gap-2 border-b border-border bg-background px-[14px] py-[10px]">
+        <div className="flex w-0 min-w-0 flex-1 gap-2 overflow-x-auto overscroll-x-contain no-scrollbar [contain:layout]">
           <button
             onClick={() => setActiveId(null)}
             className={cn(
