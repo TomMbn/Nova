@@ -74,7 +74,10 @@ export function SearchBar() {
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
-      if (!containerRef.current?.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Element;
+      if (containerRef.current?.contains(target)) return;
+      if (target.closest("[data-search-dropdown]")) return;
+      setOpen(false);
     }
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
@@ -128,7 +131,7 @@ export function SearchBar() {
       </div>
 
       {open && query.trim() && createPortal(
-        <div className="overflow-hidden rounded-2xl border border-border bg-popover shadow-lg" style={dropdownStyle}>
+        <div data-search-dropdown className="overflow-hidden rounded-2xl border border-border bg-popover shadow-lg" style={dropdownStyle}>
           <div className="flex border-b border-border">
             {TABS.map((t) => (
               <button
