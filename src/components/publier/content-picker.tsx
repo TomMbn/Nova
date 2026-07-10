@@ -99,17 +99,16 @@ export function ContentPicker({
               type="button"
               onClick={() => handleTileClick(tile.key)}
               className={cn(
-                "flex flex-col items-center gap-1.5 rounded-[10px] border p-3 transition-colors",
+                "flex flex-col items-center gap-2 rounded-[14px] border p-3 transition-colors",
                 active
                   ? "border-foreground bg-muted"
                   : "border-border hover:bg-muted"
               )}
             >
-              <span className="flex items-center justify-center size-9 rounded-full border border-border">
-                <Icon size={18} strokeWidth={1.6} />
+              <span className="flex items-center justify-center size-10 rounded-[10px] bg-muted">
+                <Icon size={20} strokeWidth={1.6} />
               </span>
-              <span className="text-xs font-bold">{tile.label}</span>
-              <span className="text-[11px] text-muted-foreground">{tile.hint}</span>
+              <span className="text-[12px] font-medium">{tile.label}</span>
             </button>
           );
         })}

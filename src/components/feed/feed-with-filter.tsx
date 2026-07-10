@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { FeedPost } from "@/queries/posts";
 import { PostCard } from "./post-card";
+import { PublishToast } from "@/components/ui/publish-toast";
 
 type Category = { id: string; name: string };
 
@@ -58,6 +59,10 @@ export function FeedWithFilter({
           <SlidersHorizontal size={18} strokeWidth={1.8} />
         </button>
       </div>
+
+      <Suspense>
+        <PublishToast />
+      </Suspense>
 
       {filtered.length === 0 ? (
         <p className="bg-muted/40 py-12 text-center text-sm text-muted-foreground">

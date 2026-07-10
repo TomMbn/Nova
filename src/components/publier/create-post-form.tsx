@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { createPost } from "@/actions/posts";
+import { setPendingPost } from "@/lib/pending-post";
 import { ChipGroup } from "./chip-group";
 import {
   ContentPicker,
@@ -12,26 +13,20 @@ import {
   type DocumentDraft,
   type PollDraft,
 } from "./content-picker";
-import { PostPreview } from "./post-preview";
-
 const CONTENT_MAX_LENGTH = 1000;
 
 type Option = { id: string; name: string };
-type Author = { id: string; name: string; avatarUrl: string | null; role: string };
 
 export function CreatePostForm({
   categories,
   topics,
   skills,
-  author,
 }: {
   categories: Option[];
   topics: Option[];
   skills: Option[];
-  author: Author;
 }) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
 
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [topicIds, setTopicIds] = useState<string[]>([]);
@@ -44,9 +39,6 @@ export function CreatePostForm({
   const [document, setDocument] = useState<DocumentDraft | null>(null);
   const [poll, setPoll] = useState<PollDraft | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const selectedCategory = categories.find((c) => c.id === categoryId) ?? null;
-  const selectedTopics = topics.filter((t) => topicIds.includes(t.id));
 
   function toggleTopic(id: string) {
     setTopicIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
@@ -88,19 +80,14 @@ export function CreatePostForm({
         .forEach((o) => formData.append("pollOption", o.trim()));
     }
 
-    startTransition(async () => {
-      const result = await createPost(formData);
-      if (!result.success) {
-        setError(result.error);
-        return;
-      }
-      router.push("/");
-    });
+    // Lance la création sans attendre, stocke la Promise, navigue immédiatement.
+    setPendingPost(createPost(formData));
+    router.push("/?publishing=1");
   }
 
   return (
-    <div className="flex flex-col min-h-full pb-[100px]">
-      <header className="grid grid-cols-[46px_1fr_46px] items-center px-[14px] py-[15px] sticky top-0 z-40 bg-background">
+    <div className="flex flex-col min-h-full">
+      <header className="grid grid-cols-[46px_1fr_46px] items-center px-[14px] py-[15px]">
         <Link
           href="/"
           aria-label="Fermer"
@@ -112,9 +99,11 @@ export function CreatePostForm({
         <div />
       </header>
 
-      <main className="flex-1 flex flex-col gap-5 px-[14px]">
-        <section className="flex flex-col gap-2">
-          <h2 className="text-[14px] font-bold">Catégorie</h2>
+      <main className="flex-1 flex flex-col gap-6 px-[14px]">
+        <section className="flex flex-col gap-3">
+          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Catégorie <span className="text-red-500">*</span>
+          </h2>
           <ChipGroup
             options={categories}
             selected={categoryId ? [categoryId] : []}
@@ -122,24 +111,31 @@ export function CreatePostForm({
           />
         </section>
 
-        <section className="flex flex-col gap-2">
-          <h2 className="text-[14px] font-bold">Thématique(s)</h2>
+        <section className="flex flex-col gap-3">
+          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Thématique <span className="text-red-500">*</span>
+          </h2>
           <ChipGroup options={topics} selected={topicIds} onToggle={toggleTopic} />
         </section>
 
-        <section className="flex flex-col gap-2">
-          <h2 className="text-[14px] font-bold">Compétence(s)</h2>
+        <section className="flex flex-col gap-3">
+          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Compétences
+          </h2>
           <ChipGroup options={skills} selected={skillIds} onToggle={toggleSkill} />
         </section>
 
-        <section>
+        <section className="flex flex-col gap-3">
+          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Votre message
+          </h2>
           <div className="relative">
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value.slice(0, CONTENT_MAX_LENGTH))}
               placeholder="Quoi de neuf dans la communauté ?"
-              rows={4}
-              className="w-full rounded-[10px] border border-border bg-transparent p-3 pb-6 text-sm outline-none resize-none focus-visible:border-foreground"
+              rows={5}
+              className="w-full rounded-[14px] border border-border bg-muted/40 p-4 pb-7 text-[14px] outline-none resize-none focus:border-foreground placeholder:text-muted-foreground"
             />
             <span className="absolute bottom-2 right-3 text-[11px] text-muted-foreground">
               {content.length}/{CONTENT_MAX_LENGTH}
@@ -148,7 +144,7 @@ export function CreatePostForm({
         </section>
 
         <section className="flex flex-col gap-2">
-          <h2 className="text-[14px] font-bold">Ajouter un contenu</h2>
+          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Ajouter un contenu</h2>
           <ContentPicker
             media={media}
             onAddMedia={(item) => setMedia((prev) => [...prev, item])}
@@ -169,40 +165,26 @@ export function CreatePostForm({
           />
         </section>
 
-        <section className="flex flex-col gap-2">
-          <h2 className="text-[14px] font-bold">Aperçu du post</h2>
-          <PostPreview
-            author={author}
-            category={selectedCategory}
-            topics={selectedTopics}
-            content={content}
-            media={media}
-            document={document}
-            poll={poll}
-          />
-        </section>
-
         {error && <p className="text-sm text-destructive">{error}</p>}
-      </main>
 
-      <div className="fixed bottom-0 inset-x-0 z-50 bg-background border-t border-border px-[14px] pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] flex flex-col gap-2">
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={isPending}
-          className="h-11 rounded-[10px] bg-primary text-primary-foreground text-sm font-bold disabled:opacity-50 transition-opacity"
-        >
-          {isPending ? "Publication..." : "Publier"}
-        </button>
-        <button
-          type="button"
-          disabled
-          title="Les brouillons ne sont pas encore disponibles"
-          className="h-11 rounded-[10px] border border-border text-sm font-bold text-muted-foreground opacity-50 cursor-not-allowed"
-        >
-          Enregistrer en brouillon
-        </button>
-      </div>
+        <div className="flex flex-col gap-3 pb-8">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="h-[52px] rounded-full bg-primary text-primary-foreground text-[15px] font-semibold"
+          >
+            Publier
+          </button>
+          <button
+            type="button"
+            disabled
+            title="Les brouillons ne sont pas encore disponibles"
+            className="h-10 text-[14px] text-muted-foreground opacity-50 cursor-not-allowed"
+          >
+            Enregistrer en brouillon
+          </button>
+        </div>
+      </main>
     </div>
   );
 }

@@ -1,15 +1,23 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LogOut, Pencil, Bookmark } from "lucide-react";
+import { redirect } from "next/navigation";
+import { ChevronLeft, Pencil } from "lucide-react";
 
 import { getCurrentUserProfile } from "@/queries/users";
 import { BottomNav } from "@/components/bottom-nav";
-import { TopBar } from "@/components/feed/top-bar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { buttonVariants } from "@/components/ui/button";
+
+import { ProfileTabs } from "./[id]/profile-tabs";
+import { AvatarEditor } from "./avatar-editor";
+import { ProfileMenu } from "./profile-menu";
+
+function formatPeriod(start: Date | null, end: Date | null, isCurrent: boolean) {
+  const fmt = (d: Date) =>
+    new Intl.DateTimeFormat("fr-FR", { month: "short", year: "numeric" }).format(d);
+  const from = start ? fmt(start) : null;
+  const to = isCurrent ? "Aujourd'hui" : end ? fmt(end) : null;
+  if (from && to) return `${from} — ${to}`;
+  return from ?? to ?? null;
+}
 
 export default async function ProfilPage() {
   const profile = await getCurrentUserProfile();
@@ -23,125 +31,66 @@ export default async function ProfilPage() {
     .toUpperCase();
 
   return (
-    <div className="flex flex-col min-h-full pb-20">
-      <TopBar />
-      <main className="flex-1 flex flex-col gap-4 px-4 pt-1">
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-6 text-center">
-            <Avatar size="lg" className="size-20">
-              <AvatarImage src={profile.avatarUrl ?? undefined} alt={profile.name} />
-              <AvatarFallback className="text-xl">{initials}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col gap-1">
-              <h1 className="text-lg font-semibold">{profile.name}</h1>
-              <p className="text-sm text-muted-foreground">{profile.email}</p>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <Badge variant="secondary">{profile.role.name}</Badge>
-              {profile.currentClass && (
-                <Badge variant="secondary">{profile.currentClass.name}</Badge>
-              )}
-            </div>
+    <div className="flex min-h-full flex-col">
+      <header className="flex items-center justify-between px-4 py-4">
+        <Link
+          href="/"
+          className="flex size-8 items-center justify-center rounded-full bg-muted"
+          aria-label="Retour"
+        >
+          <ChevronLeft size={16} strokeWidth={2} />
+        </Link>
+        <h2 className="text-base font-bold">Profil</h2>
+        <ProfileMenu />
+      </header>
+
+      <div className="relative px-4">
+        <div className="h-24 rounded-2xl bg-gradient-to-r from-primary/30 via-accent/20 to-[#FFD84A]/30" />
+        <div className="absolute -bottom-6 left-8">
+          <AvatarEditor avatarUrl={profile.avatarUrl} initials={initials} name={profile.name} />
+        </div>
+      </div>
+
+      <main className="flex-1 flex flex-col gap-4 px-4 pt-8">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1.5">
+            <h1 className="text-lg font-bold">{profile.name}</h1>
+            <p className="text-sm text-muted-foreground">
+              {profile.role.name}
+              {profile.currentClass && ` — ${profile.currentClass.name}`}
+            </p>
             {profile.bio && (
               <p className="text-sm text-muted-foreground">{profile.bio}</p>
             )}
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <Link
-                href="/profil/modifier"
-                className={buttonVariants({
-                  variant: "outline",
-                  className: "h-9 rounded-xl",
-                })}
-              >
-                <Pencil className="size-4" />
-                Modifier mon profil
-              </Link>
-              <Link
-                href="/profil/enregistrements"
-                className={buttonVariants({
-                  variant: "outline",
-                  className: "h-9 rounded-xl",
-                })}
-              >
-                <Bookmark className="size-4" />
-                Posts enregistrés
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {profile.followedTopics.length > 0 && (
-          <Card>
-            <CardContent className="flex flex-col gap-2">
-              <h2 className="text-sm font-medium">Spécialités</h2>
-              <div className="flex flex-wrap gap-2">
-                {profile.followedTopics.map(({ topic }) => (
-                  <Badge key={String(topic.id)} variant="secondary">
-                    {topic.name}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {profile.skills.length > 0 && (
-          <Card>
-            <CardContent className="flex flex-col gap-2">
-              <h2 className="text-sm font-medium">Compétences</h2>
-              <div className="flex flex-wrap gap-2">
-                {profile.skills.map(({ skill }) => (
-                  <Badge key={String(skill.id)} variant="outline">
-                    {skill.name}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {profile.experiences.length > 0 && (
-          <Card>
-            <CardContent className="flex flex-col gap-2">
-              <h2 className="text-sm font-medium">Expérience</h2>
-              <div className="flex flex-col gap-1">
-                {profile.experiences.map((experience) => (
-                  <div
-                    key={String(experience.id)}
-                    className="flex items-center justify-between text-sm"
-                  >
-                    <span>
-                      {experience.title
-                        ? `${experience.title} — ${experience.company.name}`
-                        : experience.company.name}
-                    </span>
-                    {experience.isCurrent && (
-                      <Badge variant="secondary">Actuel</Badge>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <Card>
-          <CardContent className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium">Apparence</h2>
-            <ThemeToggle />
-          </CardContent>
-        </Card>
-
-        <form action="/logout" method="POST">
-          <Button
-            type="submit"
-            variant="destructive"
-            className="h-11 w-full rounded-xl"
+          <Link
+            href="/profil/modifier"
+            className={buttonVariants({ className: "h-11 rounded-xl text-sm font-bold" })}
           >
-            <LogOut className="size-4" />
-            Se déconnecter
-          </Button>
-        </form>
+            <Pencil className="size-4" />
+            Modifier mon profil
+          </Link>
+        </div>
+
+        <ProfileTabs
+          skills={profile.skills.map(({ skill }) => ({
+            id: String(skill.id),
+            name: skill.name,
+          }))}
+          experiences={profile.experiences.map((experience) => ({
+            id: String(experience.id),
+            label: experience.title
+              ? `${experience.title} — ${experience.company.name}`
+              : experience.company.name,
+            period: formatPeriod(
+              experience.startDate,
+              experience.endDate,
+              experience.isCurrent
+            ),
+            isCurrent: experience.isCurrent,
+          }))}
+        />
       </main>
       <BottomNav />
     </div>
